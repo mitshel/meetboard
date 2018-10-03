@@ -1,0 +1,107 @@
+{% extends "mb_main.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+
+<h1 class="display-5">{% if meet_id %}Изменить{% else %}Новое{% endif %} совещание.</h1>
+
+<form action="{% url 'meetings:update' meet_id %}" method="post">
+    {% csrf_token %}
+
+    <div class="form-row">
+      <div class="form-group" col-md-3>
+        <label for="meetType">Тип совещания</label>
+        <select class="form-control form-control-sm" id="meetType" name ="meetType" aria-describedby="meet_type_Help">
+            {% for mtc in meeting_type_choices %}
+                <option value="{{ mtc.0 }}" {% if mtc.0 == meet.meet_type %}selected{% endif %}>{{ mtc.1 }}</option>
+            {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group col-md-3">
+            <label for="meetDate">Дата совещания:</label>
+            <input type="text" class="form-control form-control-sm" id="meetDate" name="meetDate" data-date-format="dd.mm.yyyy" data-provide="datepicker" value="{{ meet.meet_date | date:"d.m.Y" }}">
+      </div>
+      <div class="form-group col-md-3">
+        <label for="meetStart">Начало:</label>
+        <input type="text" class="form-control form-control-sm" id="meetStart" name="meetStart" value="{{ meet.meet_start }}">
+      </div>
+      <div class="form-group col-md-3">
+        <label for="meetEnd">Конец:</label>
+        <input type="text" class="form-control form-control-sm" id="meetEnd" name="meetEnd" value="{{ meet.meet_end }}">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-12">
+        <label for="meetSubj">Тема совещания:</label>
+        <input type="text" class="form-control form-control-sm" id="meetSubj" name="meetSubj" placeholder="Введите тему планируемого совещания" value="{{ meet.meet_subj }}">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-12">
+        <label for="meetPlace">Адрес студии:</label>
+        <input type="text" class="form-control form-control-sm" id="meetPlace" name="meetPlace" placeholder="Введите планируемое место проведения совещаний" value="{{ meet.meet_place }}">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-12">
+        <label for="meetLead">Ведущий совещания:</label>
+        <input type="text" class="form-control form-control-sm" id="meetLead" name="meetLead" placeholder="Иванов Е.Н. - заместитель начальника Управления" aria-describedby="meetLead_Help" value="{{ meet.meet_lead }}">
+        <small id="meetLead_Help" class="form-text text-muted">Введите информацию о ведущем совещания в формате Фамилия И.О. - должность.</small>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-4">
+        <label for="meetInit">Инициатор совещания:</label>
+        <input type="text" class="form-control form-control-sm" id="meetInit" name="meetInit" placeholder="Козлов И.И." value="{{ meet.meet_init }}">
+      </div>
+      <div class="form-group col-md-4">
+        <label for="meetAcc">Ответственный за подготовку:</label>
+        <input type="text" class="form-control form-control-sm" id="meetAcc" name="meetAcc" placeholder="Сидоров А.В." value="{{ meet.meet_acc }}">
+      </div>
+      <div class="form-group col-md-4">
+        <label for="meetTel">Контактный телефон:</label>
+        <input type="text" class="form-control form-control-sm" id="meetTel" name="meetTel" placeholder="(700) 2-22-22" value="{{ meet.meet_tel }}">
+      </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" id="meetSave" name="meetSave" value="1" {% if meet.meet_save %}checked{% endif %}>
+          <label class="form-check-label" for="meetSave">Необходима запись совещания</label>
+        </div>
+       <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="meetConfident" id="meetConfident1" value="0" {% if not meet.meet_confident %}checked{% endif %}>
+          <label class="form-check-label" for="meetConfident1">Информация общего доступа</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="meetConfident" id="meetConfident2" value="1" {% if meet.meet_confident %}checked{% endif %}>
+          <label class="form-check-label" for="meetConfident2">Коммерческая тайна</label>
+        </div>
+    </div>
+    <br>
+    <button type="submit" class="btn btn-primary"> {% if meet %}Сохранить{% else %}Создать{% endif %} совещание </button>
+    <a role="button" class="btn btn-secondary" href="{% url 'meetings:table' %}" > Отмена </a>
+</form>
+</div>
+{% endblock %}  {# content #}
+
+{% block js-block %}
+    <script src="{% static "js/bootstrap-datepicker.min.js" %}"></script>
+    <script src="{% static "js/bootstrap-datepicker.ru.min.js" %}"></script>
+<script type="text/javascript">
+    $('#meetDate').datepicker({
+        weekStart: 1,
+        daysOfWeekHighlighted: "6,0",
+        autoclose: true,
+        todayHighlight: true,
+        language: "ru",
+    });
+</script>
+{% endblock %}  {# js-block #}

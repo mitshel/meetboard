@@ -1,0 +1,115 @@
+{% extends "mb_main.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+    <div class="row">
+    <div class="col-sm-12">
+        <div class="btn-group" role="group" aria-label="meetings menu">
+              <a type="button" class="btn btn-secondary" href="{% url 'meetings:add' %}"><i class="fa fa-plus"></i> Создать совещание </a>
+        </div>
+    </div>
+    </div>
+
+    <br>
+
+
+<div class="modal  members-modal-lg" tabindex="-1" role="dialog" id="membersModal" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+          <span class="modal-title">Участники совещания</span>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Modal body text goes here.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+        <button type="button" class="btn btn-primary">Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <table class="table table-sm table-hover display" id="meetTable">
+      <thead>
+        <tr>
+          <th scope="col">Действия</th>
+          <th scope="col">Дата</th>
+          <th scope="col">Тема</th>
+          <th scope="col">Место</th>
+          <th scope="col">Время</th>
+          <th scope="col">Участники</th>
+          <th scope="col">Повестка</th>
+          <th scope="col">Студии</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for m in meetings %}
+        <tr>
+          <th scope="row">
+          <a href="{% url 'meetings:delete' m.id %}" data-toggle="tooltip" data-placement="top" title="Удалить совещание"><i class="fa fa-minus"></i></a>
+          <a href="{% url 'meetings:update' m.id %}" data-toggle="tooltip" data-placement="top" title="Изменить данные"><i class="fa fa-edit"></i></a>
+          <a href="{% url 'meetings:copy' m.id %}" data-toggle="tooltip" data-placement="top" title="Скопировать"><i class="fa fa-copy"></i></a>
+          </th>
+          <td>{{ m.meet_date | date:"d.m.Y" }}</td>
+          <td>{{ m.meet_subj }}</td>
+          <td>{{ m.meet_place }}</td>
+          <td>{{ m.meet_start }}-{{ m.meet_end }}</td>
+            <td><a href="#" data-toggle="modal" data-target=".members-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Участники</a></td>
+          <td><a href="#">Повестка</a></td>
+          <td><a href="#">Студии</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+{% endblock %}  {# content #}
+
+{% block js-block %}
+<script type="text/javascript">
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+$('#membersModal').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // Button that triggered the modal
+  var meet = button.data('meet') // Extract info from data-* attributes
+  var subj = button.data('subj') // Extract info from data-* attributes
+  var dt = button.data('dt') // Extract info from data-* attributes
+  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+  var modal = $(this)
+  modal.find('.modal-title').html('Участники совещания: <b>"' + subj + '"</b><br>Дата совещания: <b>'+dt+'</b>')
+  //  modal.find('.modal-body input').val(recipient)
+})
+$(document).ready( function () {
+    $('#meetTable').DataTable({
+            "language": {
+                          "processing": "Подождите...",
+                          "search": "Поиск:",
+                          "lengthMenu": "Показать _MENU_ записей",
+                          "info": "Записи с _START_ до _END_ из _TOTAL_ записей",
+                          "infoEmpty": "Записи с 0 до 0 из 0 записей",
+                          "infoFiltered": "(отфильтровано из _MAX_ записей)",
+                          "infoPostFix": "",
+                          "loadingRecords": "Загрузка записей...",
+                          "zeroRecords": "Записи отсутствуют.",
+                          "emptyTable": "В таблице отсутствуют данные",
+                          "paginate": {
+                            "first": "Первая",
+                            "previous": "Предыдущая",
+                            "next": "Следующая",
+                            "last": "Последняя"
+                          },
+                          "aria": {
+                            "sortAscending": ": активировать для сортировки столбца по возрастанию",
+                            "sortDescending": ": активировать для сортировки столбца по убыванию"
+                          }
+                        }
+        });
+} );
+
+</script>
+{% endblock %}

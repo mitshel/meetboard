@@ -1,0 +1,14 @@
+{% extends "mb_main.html" %}
+{% load i18n %}
+
+{% block main-content %}
+      <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <div class="container">
+          <h1 class="display-5">Система планирования совещаний</h1>
+          <p>Система планирования совещаний поможет Вам организовать совещание шаг за шагом, оформить все необходимые документы и выполнить рассылку участникам совещаний.</p>
+          <hr class="my-4">
+          <a class="btn btn-primary btn-lg" href="{% url 'meetings:table' %}" role="button">Начать работу &raquo;</a>
+        </div>
+      </div>
+{% endblock %}  {# content #}

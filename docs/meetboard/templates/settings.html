@@ -1,0 +1,54 @@
+
+        
+<div class="container-fluid">
+    <div class="row content">
+            <div id="here_table" class="tabzoom">
+                    <form action="/emailSendSave" method="POST"  class="form-control">
+                            <fieldset>
+                            <legend>
+                            Настройка почты отправителя:
+                            </legend>
+                            <div class="form-group col-xs-" >
+                                    <div     class="col-xs-2" >
+                            <input id="emailHostSend" type="text" size="20"  name="emailHostSend" class="form-control" value="{{.EmailHostSend}}" ></div><br /><small>Хост</small><br />
+                            <div     class="col-xs-2" >
+                            <input  id="emailPortSend" type="Number" size="20" name="emailPortSend" class="form-control" value="{{.EmailPortSend}}"> </div> <br /><small>Порт</small><br />
+                            <div     class="col-xs-2" >
+                            <input  id="emailUserSend" type="text" size="20"  name="emailUserSend" class="form-control" value="{{.EmailUserSend}}"> </div> <br /> <small>Пользователь</small><br />
+                            <div     class="col-xs-2" >
+                           <input  id="emailUserMail" type="text" size="20"  name="emailUserMail" class="form-control"value="{{.EmailUserMail}}"> </div> <br /> <small>Почта пользователя</small><br />
+                            <div     class="col-xs-2" >
+                                        <input type="hidden" name="id" value="{{.Id}}">
+                            <input  id="emailPasswordSend" type="password" name="emailPasswordSend" size="20"  class="form-control" value="{{.EmailPasswordSend}}"> </div>  <br /> <small>Пароль</small><br />
+                            <div     class="col-xs-2" >
+                                        <input  id="emailHeaderSend" type="text" size="20"  name="emailHeaderSend" class="form-control" value="{{.ЕmailHeaderSend}}"> </div> <br /> <small>Заголовок письма при заселении</small><br />
+                                        
+                           
+                            <div     class="col-xs-2" >
+                            <input  id="emailTextSend" type="textarea" name="emailTextSend" size="180"  class="form-control" value="{{.ЕmailTextSend}}"> </div>  <br /> <small>Текст письма при заселении</small><br />
+                            <div     class="col-xs-2" >
+                                <input  id="emailHeaderSendProdlenie" type="text" size="20"  name="emailHeaderSendProdlenie" class="form-control" value="{{.EmailHeaderSendProdlenie}}"> </div> <br /> <small>Заголовок письма при продлении</small><br />
+                                
+                   
+                            <div     class="col-xs-2" >
+                                <input  id="emailTextSendProdlenie" type="textarea" name="emailTextSendProdlenie" size="180"  class="form-control" value="{{.EmailTextSendProdlenie}}"> </div>  <br /> <small>Текст письма при продлении</small><br />
+                                <div     class="col-xs-2" >
+                                        <input  id="emailTo" type="textarea" name="emailTo" size="180"  class="form-control" value="{{.EmailTo}}"> </div>  <br /> <small>Кому отправлять письмо</small><br /> 
+
+
+                             <div     class="col-xs-2" >
+                            <input  id="emailCopyMail" type="textarea" name="emailCopyMail" size="180"  class="form-control" value="{{.EmailCopyMail}}"> </div>  <br /> <small>Кому копию письма</small><br />
+                            
+                                                    
+                                                   
+                            <div     class="col-xs-2" >         
+                                       
+                            <input type="submit" value="Cохранить" /></div>
+                        </div>
+                            
+                            </fieldset>
+                            </form>
+            </div>
+
+     </div>
+</div>

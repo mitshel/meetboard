@@ -1,0 +1,553 @@
+
+<style>
+    /* Style the buttons that are used to open and close the accordion panel */
+    button.accordion {
+        background-color: #eee;
+        color: #444;
+        cursor: pointer;
+        padding: 5px;
+        width: 100%;
+        text-align: left;
+        border: none;
+        outline: none;
+        transition: 0.4s;
+    }
+    .hide
+    {
+    display:none;
+    }
+    /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+    button.accordion.active, button.accordion:hover {
+        background-color: #ddd;
+    }
+
+    /* Style the accordion panel. Note: hidden by default */
+    div.panel {
+        padding: 0 18px;
+        background-color: white;
+        display: none;
+    }
+
+    .hide
+    {
+    display:none;
+    }
+   
+    .jsgrid {
+  overflow: visible;
+}
+
+    .class0 > td{ 
+    background-color:rgba(255, 0, 0, 0.582)  !important;;
+    }
+    .class1 > td{ 
+    background-color:rgba(199, 106, 0, 0.425)  !important;;
+    }
+    .class2 > td{ 
+    background-color:rgba(255, 238, 0, 0.425)  !important;;
+    }
+    .class3 > td{ 
+    background-color:rgba(238, 228, 88, 0.781)  !important;;
+    }
+    .class4 > td{ 
+        background-color:rgba(79, 182, 241, 0.425)  !important;;
+    }
+    .class5 > td{ 
+        background-color:rgba(0, 81, 255, 0.582)  !important;;
+    }
+    .class6 > td{ 
+        background-color:rgba(0, 255, 128, 0.425)  !important;;
+    }
+    .class7 > td{ 
+    background-color:rgba(21, 255, 0, 0.616)  !important;;
+    }
+    .popup_overlay{
+  display: none;
+  background: rgba(0,0,0,.9);
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+.popup{
+  display: none;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(0,0,0,1);
+  width: 600px;
+  height: 500px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-left: -300px;
+  margin-top: -250px;
+}
+.popup_title{
+  font-weight: bold;
+  padding: 10px;
+}
+.popup_content{
+  padding: 10px;
+  border-top: 1px solid #ccc;
+}
+.closer{
+  float: right;
+  cursor: pointer;
+}
+        .config-panel {
+            padding: 10px;
+            margin: 10px 0;
+            background: #fcfcfc;
+            border: 1px solid #e9e9e9;
+            display: inline-block;
+        }
+    
+        .config-panel label {
+            margin-right: 10px;
+        }
+
+
+        .config-panelview {
+            padding: 10px;
+            margin: 10px 0;
+            background: #fcfcfc;
+            border: 1px solid #e9e9e9;
+            display: inline-block;
+        }
+    
+        .config-panelview label {
+            margin-right: 10px;
+        }
+
+  </style>
+
+</style>
+
+<div class="container-fluid ">
+     
+        <div class="row content ">
+                <div class="row content ">
+                        <button class="btn btn-dark btn-sm buttonzoom "  type="submit" onclick="myFunction()">Сортировка по цвету</button>
+                        <div class="config-panel" style="margin-top:-25px">
+                                <label class="panzoom"><input id="heading" type="checkbox" checked /> Заголовоки</label>
+                                <label class="panzoom"><input id="filtering" type="checkbox"  checked/> Фильтрация</label>
+                                <label class="panzoom"><input id="inserting" type="checkbox" /> Вставка</label>
+                                <label class="panzoom"><input id="editing" type="checkbox" checked /> Редактирование</label>
+                                     <!--     <label><input id="paging" type="checkbox" checked /> Страничник</label>-->
+                              <!--  <label><input id="sorting" type="checkbox" checked /> Сортировка</label> -->
+                                <label class="panzoom"><input id="selecting" type="checkbox" checked /> Выборка</label>
+                            </div> 
+                             
+                                         
+                    </div>  
+                <div class="config-panelview" >
+                    <label > <font size="3">Видимость столбцов:</font> </label>
+                <label class="panzoom"><input id="config-panelview1" name="data" type="checkbox" checked /> Дата</label>
+                <label class="panzoom"><input id="config-panelview2" name="numproject" type="checkbox" checked />№ Проекта</label>
+                <label class="panzoom"><input id="config-panelview3" name="ispolnitelsad" type="checkbox"  checked/>Исполнитель САД</label>
+                <label class="panzoom"><input id="config-panelview4" name="ispolniterl" type="checkbox" checked/> Исполнитель</label>
+                <label class="panzoom"><input id="config-panelview5" name="komu" type="checkbox" checked/> Кому</label>
+                <label class="panzoom"><input id="config-panelview6" name="ochem" type="checkbox" checked/> О чем</label>
+                <label class="panzoom"><input id="config-panelview7" name="projectpisma" type="checkbox" checked/> Проект письма</label>
+                <label class="panzoom"><input id="config-panelview8" name="skanpisma" type="checkbox" checked/> Скан письма</label>
+                <label class="panzoom"><input id="config-panelview9" name="stadiyavsad" type="checkbox" checked /> Стадия в САД</label>
+                <label class="panzoom"><input id="config-panelview10" name="regnum" type="checkbox"  checked/>Рег. номер</label>
+                <label class="panzoom"><input id="config-panelview11" name="numvhadresat" type="checkbox"  checked/>№ вх у адресата</label>
+                <label class="panzoom"><input id="config-panelview12" name="comment" type="checkbox"  checked/>Комментарии</label>
+                <label class="panzoom"><input id="config-panelview13" name="control" type="checkbox"  checked/>Контроль</label>
+                
+                
+                
+                
+                
+            </div> 
+
+                <div id="here_table">
+                       
+                        <div id="jsGrid" class="scaleclass"></div>
+                </div>
+
+         </div>
+ </div>
+
+<script type="text/javascript">
+
+
+
+function myFunction() {
+    $("#jsGrid").jsGrid("sort", "sorterColor");
+}
+var jsonTable;
+var jsonToSendMails = [];
+
+function getQueries() {
+    var xhr = new XMLHttpRequest();
+   
+    xhr.onreadystatechange = function () {
+    if (this.readyState == 4) {
+            if (this.status >= 200 && xhr.status < 300) {
+                var jsonTable = JSON.parse(this.responseText);
+
+                var stadiyavsad = {
+                    name: "stadiyavsad",
+                    type: "select",
+                    items: [
+                        { Name: "", Id: 0 },
+                        { Name: "Подготовка", Id: 1 },
+                        { Name: "Согласование в САД", Id: 2 },
+                        { Name: "Подписано в САД", Id: 3 },
+                        { Name: "Подписано в оригинале", Id: 4 },
+                        { Name: "Отправлено по email", Id: 5 },
+                        { Name: "Отправлено через экспедицию", Id: 6 } ,
+                        { Name: "Завершено", Id: 7 } ],
+                    valueField: "Id",
+                    textField: "Name",
+                    filtering: true,
+                    width:50,
+                    title: "Стадия в САД"
+
+                    }
+
+                var DateField = function(config) {
+                        jsGrid.Field.call(this, config);
+                    };
+                    
+                    DateField.prototype = new jsGrid.Field({
+                        sorter: function(date1, date2) {
+                            return new Date(date1) - new Date(date2);
+                        },    
+                        
+                        itemTemplate: function(value) {
+                            return new Date(value).toLocaleString('ru', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            });
+                        },
+                        
+                        filterTemplate: function() {
+                            var now = new Date();
+                            this._fromPicker = $("<input>").datepicker({ defaultDate: now.setFullYear(now.getFullYear() - 1) });
+                            this._toPicker = $("<input>").datepicker({ defaultDate: now.setFullYear(now.getFullYear() + 1) });
+                            return $("<div>").append(this._fromPicker).append(this._toPicker);
+                        },
+                        
+                        insertTemplate: function(value) {
+                            return this._insertPicker = $("<input>").datepicker({ defaultDate: new Date() });
+                        },
+                        
+                        editTemplate: function(value) {
+                            return this._editPicker = $("<input>").datepicker().datepicker("setDate", new Date(value));
+                        },
+                        
+                        insertValue: function() {
+                            return this._insertPicker.datepicker("getDate");
+                        },
+                        
+                        editValue: function() {
+                            return this._editPicker.datepicker("getDate");
+                        },
+                        
+                        filterValue: function() {
+                            return {
+                                from: this._fromPicker.datepicker("getDate"),
+                                to: this._toPicker.datepicker("getDate")
+                            };
+                        }
+                    });
+                    
+                    jsGrid.fields.date = DateField;
+
+                $("#jsGrid").jsGrid({
+
+                            controller: {
+                            loadData: function(filter) {  //Клиентский поиск
+                            return $.grep(jsonTable, function(jsonTable) {
+                                return (!filter.ispolniterl || jsonTable.ispolniterl.indexOf(filter.ispolniterl) > -1)
+                                && (!filter.komu || jsonTable.komu.indexOf(filter.komu) > -1)
+                                && (!filter.ochem || jsonTable.ochem.indexOf(filter.ochem) > -1)
+                                && (!filter.comment || jsonTable.comment.indexOf(filter.comment) > -1);
+                                
+                            });
+                        },
+                            insertItem: function(item) {
+                                var formData = new FormData()
+                                formData.append("projectpisma", item.projectpisma);
+                                formData.append("skanpisma", item.skanpisma);
+                                formData.append("otpravkorig", item.otpravkorig);
+                                formData.append("numvhadresat", item.numvhadresat);
+                                formData.append("emailotpravlen", item.emailotpravlen);
+                                formData.append("regnum", item.regnum);
+                                formData.append("stadiyavsad", item.stadiyavsad);
+                                formData.append("id", item.id);
+                                formData.append("data", item.data);
+                                formData.append("numproject", item.numproject);
+                                formData.append("ispolniterl", item.ispolniterl);
+                                formData.append("komu", item.komu);
+                                formData.append("ochem", item.ochem);
+                                formData.append("comment", item.comment);
+                                formData.append("ispolnitelsad", item.ispolnitelsad);
+                                
+                                return $.ajax({
+                                    type: "POST",
+                                    url: "/vizovieaginsertQuery",
+                                    data: formData,
+                                    contentType: false,
+                                    processData: false
+                                });
+                            },
+                            updateItem: function(item) {
+                                var formData = new FormData()
+                              
+                                formData.append("projectpisma", item.projectpisma);
+                                formData.append("skanpisma", item.skanpisma);
+                                formData.append("otpravkorig", item.otpravkorig);
+                                formData.append("numvhadresat", item.numvhadresat);
+                                formData.append("emailotpravlen", item.emailotpravlen);
+                                formData.append("stadiyavsad", item.stadiyavsad);
+                                formData.append("regnum", item.regnum);
+                                formData.append("id", item.id);
+                                formData.append("data", item.data);
+                                formData.append("numproject", item.numproject);
+                                formData.append("ispolniterl", item.ispolniterl);
+                                formData.append("komu", item.komu);
+                                formData.append("ochem", item.ochem);
+                                formData.append("comment", item.comment);
+                                formData.append("ispolnitelsad", item.ispolnitelsad);
+                                return $.ajax({
+                                    type: "Post",
+                                    url: "/vizovieagupdateQuery",
+                                    data: formData,
+                                    contentType: false,
+                                    processData: false
+                                });
+                            },
+                            deleteItem: function(item) {
+                                return $.ajax({
+                                    type: "Post",
+                                    url: "/vizovieagdeleteQuery",
+                                    data: item,
+                                    error: (jqXHR , err) => { 
+                                    if(jqXHR.status == 400){
+                                        console.log("handle forbidden error code");
+                                        }
+                                    },
+                                    success: (result, status, jqXHR) => {},
+                                    });
+                            }
+                    },
+                    width: "100%",
+                    height: "100%",
+                    autoload: false,
+                    inserting: true,
+                    sorting: true,
+                    paging: true,
+                    filtering: true,
+                    editing: true,
+                    autoload: true,
+                    pageSize: 300,
+                    pageButtonCount: 5,
+                    noDataContent: "Нет данных",
+                    confirmDeleting: true,
+                    deleteConfirm: "Подтверждаете удаление?",
+                    loadIndication: true,
+                    loadIndicationDelay: 500,
+                    loadMessage: "Ждемс...",
+                    loadShading: true,
+                    data: jsonTable,
+                    rowClass: function (item, itemIndex) //item is the data in a row, index is the row number.
+                    {
+                        if (item.stadiyavsad == 0) {
+                          //  { Name: "", Id: 0 },
+                          item.sorterColor = 0;
+                          return "class0"
+                        } else if  (item.stadiyavsad ==1) {
+                            item.sorterColor = 1;
+                            return "class1"
+                           // { Name: "Подготовка", Id: 1 },
+                        } else if  (item.stadiyavsad == 2) {
+                            item.sorterColor = 2;
+                            return "class2"
+                           // { Name: "Согласование в САД", Id: 2 },
+                        } else if  (item.stadiyavsad == 3) {
+                            item.sorterColor = 3;
+                            return "class3"
+                          //  { Name: "Подписано в САД", Id: 3 },
+                        } else if  (item.stadiyavsad == 4) {
+                            item.sorterColor = 4;
+                            return "class4"
+                          //  { Name: "Подписано в оригинале", Id: 4 },
+                        } else if  (item.stadiyavsad == 5) {
+                            item.sorterColor = 5;
+                            return "class5"
+                           // { Name: "Отправлено по email", Id: 5 },
+                        } else if  (item.stadiyavsad == 6) {
+                            item.sorterColor = 6;
+                            return "class6"
+                           // { Name: "Отправлено через экспедицию", Id: 6 } ,
+                        } else if  (item.stadiyavsad == 7) {
+                            item.sorterColor = 7;
+                            return "class7"
+                         //   { Name: "Завершено", Id: 7 } ],
+                        }  else  {
+                          //  { Name: "", Id: 0 },
+                          item.sorterColor = 0;
+                          return "class0"
+                        }
+                       
+                    },
+                    fields: [
+                    { name: "sorterColor", sorting:true,  css: "hide", width:0,type: "number" },
+                        { name: "id", css: "hide", width:0,type: "number",title: "№" },
+                        { name: "data", type: "date",title: "Дата"},
+                        { name: "numproject",width:55, type: "number", title: "№ Проекта"},
+                        
+                        { name: "ispolnitelsad", width:100,type: "text", title: "Исполнитель САД"},
+                        { name: "ispolniterl", type: "text",title: "Исполнитель"},
+                        { name: "komu", type: "text",title: "Кому"},
+                        { name: "ochem", type: "text",title: "О чем"},
+                        { name: "projectpisma", sorting:false,type: "text",title: "Проект письма",
+                            insertTemplate: function() {
+                                var insertControl = this.insertControl = $("<input>").prop("type", "file");
+                            
+                                return insertControl;
+                            },
+                            insertValue: function() {
+                                return this.insertControl[0].files[0]; 
+                            },
+                            editTemplate: function(value) {
+                                if ((value ==undefined) ||(value.trim() == ""))
+                                {
+                                    var insertControl = this.insertControl = $("<input>").prop("type", "file");
+                                    return insertControl;
+                                } else {
+                                
+                                    return this._editTemp =$("<a>").attr("href","/files/"+ value).attr("download", value).append($("<img>").attr("src", "/assets/download2.png").css({ height: 30, width: 50 })).append( $("<input>").addClass("dagestanbiltut").prop("type", "file"));//this._editTemp = value;
+                                }
+                            },        
+                            editValue: function() {
+                              
+                                if ((this.insertControl[0].files[0] != undefined)) {
+                                
+                                    return this.insertControl[0].files[0]; 
+                                    } else 
+                                    {  
+                                        var editTiempo = this._editTemp ;
+                                        if (editTiempo != undefined) {
+                                          
+                                            var hendo = this._editTemp.find(".dagestanbiltut");
+                                            if (hendo != undefined)
+                                            {
+                                                return hendo[0].files[0]; 
+                                            }  
+                                            return this._editTemp.attr('download');    
+                                        }
+                                     
+                                    }
+                            },
+                              itemTemplate: function(val, item) {
+                                if (val ==undefined) {
+                                    var  hrefSsilka = $("<img>").attr("src", "/assets/error.png").css({ height: 50, width: 50 });
+                                       return  hrefSsilka;
+                                } else if (val.trim() == "") {
+                                    var  hrefSsilka = $("<img>").attr("src", "/assets/error.png").css({ height: 50, width: 50 });
+                                        return  hrefSsilka;
+                                } else {
+                                    
+                                        var  hrefSsilka = $("<a>").attr("href","/files/"+ val).attr("download", val).append($("<img>").attr("src", "/assets/download2.png").css({ height: 50, width: 50 }));
+                                        return  hrefSsilka;
+                                }
+                                 
+                             },
+                        align: "center",
+                        width: 65},
+                        { name: "skanpisma", sorting:false,type: "text",title: "Скан письма",    align: "center",
+                        width:65,
+                        itemTemplate: function(val, item) {
+                            if (val ==undefined) {
+                                var  hrefSsilka = $("<img>").attr("src", "/assets/error.png").css({ height: 50, width: 50 });
+                                   return  hrefSsilka;
+                            } else if (val.trim() != "") {
+                                var  hrefSsilka = $("<a>").attr("href","/files/"+ val).attr("download", val).append($("<img>").attr("src", "/assets/download2.png").css({ height: 50, width: 50 }));
+                                    return  hrefSsilka;
+                            } else {
+                                var  hrefSsilka = $("<img>").attr("src", "/assets/error.png").css({ height: 50, width: 50 });
+                                    return  hrefSsilka;
+                            }
+                            },
+                            editTemplate: function(value) {
+                                if ((value ==undefined) ||(value.trim() == ""))
+                                {
+                                    var insertControl = this.insertControl = $("<input>").prop("type", "file");
+                                    return insertControl;
+                                } else {
+                                
+                                    return this._editTemp =$("<a>").attr("href","/files/"+ value).attr("download", value).append($("<img>").attr("src", "/assets/download2.png").css({ height: 30, width: 50 })).append( $("<input>").addClass("dagestanbiltut1").prop("type", "file"));//this._editTemp = value;
+                                }
+                            },        
+                            editValue: function() {
+                            
+                                if ((this.insertControl[0].files[0] != undefined)) {
+                                
+                                    return this.insertControl[0].files[0]; 
+                                    } else 
+                                    {  
+                                        var editTiempo = this._editTemp ;
+                                        if (editTiempo != undefined) {
+                                            var hendo = this._editTemp.find(".dagestanbiltut1");
+                                            if (hendo != undefined)
+                                            {
+                                                return hendo[0].files[0]; 
+                                            }  
+                                            return this._editTemp.attr('download');    
+                                        }
+                                     
+                                    }
+                            },
+                            
+                            insertTemplate: function() {
+                                var insertControl = this.insertControl = $("<input>").prop("type", "file");
+                                return insertControl;
+                            },
+                            insertValue: function() {
+                                return this.insertControl[0].files[0]; 
+                            },
+                        },
+                        stadiyavsad,
+                        { name: "regnum",width:100, type: "text",title: "Рег. номер"},
+                        { name: "emailotpravlen", width:40,  autosearch: true  , type: "checkbox",css: "hide", width:0,title: "Отпр. по email", 
+                                 
+                           // filtercss: "checkzoom", 
+                        },
+                         
+                        { name: "numvhadresat", width:100,type: "text", title: "№ вх у адресата"},
+                        { name: "comment",width:80,align:"Center", type: "text", title: "Комментарии"},
+                        { name: "otpravkorig",width:40, type: "checkbox",css: "hide", width:0,  autosearch: true  ,title: "Отправка оригинала документов", 
+                              
+                           // filtercss: "checkzoom", 
+                        },
+                        
+                        { type: "control" , name:"control", width: 100}]
+                    });
+          
+              }
+        }
+      }
+    xhr.open('GET', '/vizovieagGetQueries');
+    xhr.send();
+    $(".config-panel input[type=checkbox]").on("click", function() {
+                    var $cb = $(this);
+                    $("#jsGrid").jsGrid("option", $cb.attr("id"), $cb.is(":checked"));
+                });    
+    $(".config-panelview input[type=checkbox]").on("click", function() {
+                    var $cb1 = $(this);
+                    $("#jsGrid").jsGrid("fieldOption", $cb1.attr("name"), "visible", $cb1.is(":checked"));
+                });   
+    $("#jsGrid").jsGrid("sort", "sorterColor");
+}
+
+getQueries();
+</script>
+
+
+
