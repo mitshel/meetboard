@@ -30,11 +30,12 @@ class Meeting(models.Model):
     meet_tel = models.CharField(max_length=20, blank=True)
     meet_save = models.BooleanField(default=False)
     meet_confident = models.BooleanField(default=False)
-    members = models.ManyToManyField('Member')
+    members = models.ManyToManyField('Member', through='Meeting_Member')
     studios = models.ManyToManyField('Studio')
 
     def __str__(self):
          return  str(self.meet_date) +' | '+ self.meet_subj
+
 
 class MeetingForm(ModelForm):
     class Meta:
@@ -48,6 +49,7 @@ class Member(models.Model):
     fio = models.CharField(max_length=64, db_index=True)
     dol = models.CharField(max_length=128, db_index=True)
     dep = models.ForeignKey('Dep',db_index=True, null=True, on_delete=models.SET_NULL)
+    is_speaker = models.BooleanField(default=False);
 
     def __str__(self):
          return  self.fio
@@ -74,3 +76,8 @@ class Item(models.Model):
 
     def __str__(self):
         return self.description
+
+class Meeting_Member(models.Model):
+    meeting = models.ForeignKey('Meeting', db_index=True, on_delete=models.CASCADE)
+    member = models.ForeignKey('Member', db_index=True, on_delete=models.CASCADE)
+    order_n = models.IntegerField(null=False, default=0)

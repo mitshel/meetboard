@@ -10,6 +10,9 @@
     <link rel="stylesheet" type="text/css" href="{% static "css/bootstrap-datepicker.min.css" %}">
     <link rel="stylesheet" type="text/css"  href="{% static "css/jquery.dataTables.min.css" %}">
     <link rel="stylesheet" href="{% static "fonts/css/all.css" %}">
+    <link rel="stylesheet" type="text/css"  href="{% static "appendGrid/jquery-ui.structure.min.css" %}">
+    <link rel="stylesheet" type="text/css"  href="{% static "appendGrid/jquery-ui.theme.min.css" %}">
+    <link rel="stylesheet" type="text/css"  href="{% static "appendGrid/jquery.appendGrid-1.7.1.min.css" %}">
     <style>
         .modal-lg {
             max-width: 90% !important;
@@ -33,6 +36,7 @@
           </li>
         </ul>
       </div>
+      <a class="nav-link" href="{% url 'admin:index' %}"><i class="fa fa-cogs"></i></a>
     </nav>
 
 
@@ -78,6 +82,8 @@
     <script src="{% static "js/jquery-3.3.1.min.js" %}"></script>
     <script src="{% static "js/bootstrap.bundle.min.js" %}"></script>
     <script src="{% static "js/jquery.dataTables.min.js" %}"></script>
+{#    <script type="text/javascript" src="{% static "appendGrid/jquery-1.12.4.min.js" %}"></script>#}
+    <script type="text/javascript" src="{% static "appendGrid/jquery-ui-1.12.1.min.js" %}"></script>
     {% block js-block %}    {% endblock %}
 </body>
 </html>

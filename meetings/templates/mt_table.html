@@ -24,30 +24,15 @@
         </button>
       </div>
 
-      <div class="modal-body">
-          <button type="button" class="btn btn-outline-primary btn-sm" id="btn_addMember"><i class="fa fa-plus"></i> Добавить</button>
-          <table class="table table-sm table-hover" id="membersTable">
-              <thead>
-              <tr>
-                  <th scope="col">id</th>
-                  <th scope="col">Организация</th>
-                  <th scope="col">Фамилия</th>
-                  <th scope="col">Имя</th>
-                  <th scope="col">Отчество</th>
-                  <th scope="col">Должность</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr>
-                  <td class="tabledit-data">1</td>
-                  <td class="tabledit-data">2</td>
-                  <td class="tabledit-data">3</td>
-                  <td class="tabledit-data">4</td>
-                  <td class="tabledit-data">5</td>
-                  <td class="tabledit-data">6</td>
-              </tr>
-              </tbody>
-          </table>
+      <div class="modal-body mx-auto">
+          <form action="{% url 'meetings:membersupd' %}" method="post" id="members_form">
+          {% csrf_token %}
+          <table id="membersTable"> </table>
+
+          <br>
+          <button id="membersLoad" type="button">Load Data</button>
+          <button id="membersSerialize" type="button">jQuery Serialize</button>
+          </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
@@ -93,21 +78,32 @@
 
 {% block js-block %}
 <script src="{% static "js/jquery.tabledit.min.js" %}"></script>
+<script type="text/javascript" src="{% static "appendGrid/jquery.appendGrid-1.7.1.min.js" %}"></script>
 <script type="text/javascript">
+
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
-})
+});
+
 $('#membersModal').on('show.bs.modal', function (event) {
-  var button = $(event.relatedTarget) // Button that triggered the modal
-  var meet = button.data('meet') // Extract info from data-* attributes
-  var subj = button.data('subj') // Extract info from data-* attributes
-  var dt = button.data('dt') // Extract info from data-* attributes
+  var button = $(event.relatedTarget); // Button that triggered the modal
+  var meet = button.data('meet'); // Extract info from data-* attributes
+  var subj = button.data('subj'); // Extract info from data-* attributes
+  var dt = button.data('dt'); // Extract info from data-* attributes
   // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
   // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-  var modal = $(this)
+  var modal = $(this);
   modal.find('.modal-title').html('Участники совещания: <b>"' + subj + '"</b><br>Дата совещания: <b>'+dt+'</b>')
   //  modal.find('.modal-body input').val(recipient)
-})
+
+  // Удаляем все данные таблицы
+  while ($('#membersTable').appendGrid('getRowCount')>0)  {
+      $('#membersTable').appendGrid('removeRow', 0);
+  };
+
+ // Загружаем данные из БД
+});
+
 $(document).ready( function () {
     $('#meetTable').DataTable({
             "language": {
@@ -135,29 +131,58 @@ $(document).ready( function () {
         });
 } );
 
-$('#membersTable').Tabledit({
-    url: 'example.php',
-    columns: {
-        identifier: [0, 'id'],
-        editable: [[1, 'Организация'], [2, 'Фамилия'], [3, 'Имя'], [4, 'Отчетсво'], [5, 'Должность']]
-    }
-});
+    $(function () {
+        $('#membersTable').appendGrid({caption: 'Участники совещания',
+            initRows: 0,
+            columns: [
+                { name: 'dep', display: 'Организация', ctrlCss: { width: '250px'}, type: 'select', ctrlOptions:
+                        [
+                            {% autoescape off %}
+                            {% for d in deps %}
+                                '{{ d.name }}',
+                            {% endfor %}
+                            {% endautoescape %}
+                        ] },
+                { name: 'f', display: 'Фамилия', type: 'text', ctrlAttr: { maxlength: 32 } },
+                { name: 'i', display: 'Имя', type: 'text', ctrlAttr: { maxlength: 32} },
+                { name: 'o', display: 'Отчество', type: 'text', ctrlAttr: { maxlength: 32} },
+                { name: 'dol', display: 'Должность', type: 'text', ctrlAttr: { maxlength: 64} },
+                { name: 'is_speaker', display: 'Докл.', type: 'checkbox' },
+                { name: 'Id', type: 'hidden', value: 0 },
+            ],
+            i18n: {
+                append: 'Добавить запись',
+                removeLast: 'Удалить последнюю запись',
+                insert: 'Вставить запись',
+                remove: 'Удалить запись',
+                moveUp: 'Вверх',
+                moveDown: 'Вниз',
+            }
+        });
 
-$("#btn_addMember").click(function() {
-	var tableditTableName = '#membersTable';  // Identifier of table
-    //$(tableditTableName + ' tr:last').after('<tr><td class="tabledit-data"></td><td class="tabledit-data"></td><td class="tabledit-data"></td><td class="tabledit-data"></td><td class="tabledit-data"></td><td class="tabledit-data"></td></tr>');
+        // Handle `Load` button click
+        $('#membersLoad').button().click(function () {
+            $('#membersTable').appendGrid('load', [
+                { 'dep': 5, 'f': 'Шелепнев', 'i': 'Дмитрий', 'o': 'Владимирович', 'dol': 'руководитель группы СЭиР ЛИУС', 'is_speaker':0, 'Id': 0 },
+            ]);
+        });
 
-	//var newID = parseInt($(tableditTableName + " tr:last").attr("id")) + 1;
-	var clone = $(tableditTableName + " table tr:last").clone();
-	$(tableditTableName + ' tr:last').after(clone)
-	//$(tableditTableName + " .tabledit-span", clone).text("");
-	//$(tableditTableName + " .tabledit-input", clone).val("");
-	//clone.prependTo(tableditTableName + " table");
-	//$(tableditTableName + " tbody tr:first").attr("id", newID);
-	//$(tableditTableName + " tbody tr:first td .tabledit-span.tabledit-identifier").text(newID);
-	//$(tableditTableName + " tbody tr:first td .tabledit-input.tabledit-identifier").val(newID);
-	//$(tableditTableName + " tbody tr:first td:last .tabledit-edit-button").trigger("click");
-});
+        // Handle `Serialize` button click
+        $('#membersSerialize').button().click(function () {
+            msg = $(document.forms[0]).serialize();
+            action_url = $('#members_form').attr("action");
+            alert('Here is the serialized data!!\n' + msg);
 
+            $.ajax({
+                type: 'POST',
+                url: action_url,
+                data: msg,
+                success: function (data) {},
+                error: function (xhr, str) {}
+            });
+
+            return false;
+        });
+    });
 </script>
 {% endblock %}

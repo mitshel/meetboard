@@ -2,8 +2,9 @@ import datetime
 
 from django.shortcuts import render
 from django.template.context_processors import csrf
+from django.http import HttpResponse
 
-from meetings.models import MEETING_TYPE_CHOICES, Meeting, MeetingForm
+from meetings.models import MEETING_TYPE_CHOICES, Meeting, MeetingForm, Dep
 
 def home(request):
     args={}
@@ -13,6 +14,7 @@ def meet_table(request):
     args={}
 
     args['meetings'] = Meeting.objects.all().order_by('-meet_date','-meet_start')
+    args['deps'] = Dep.objects.all().order_by('name')
     return render(request,'mt_table.html', args)
 
 def meet_update(request, meet_id=None):
@@ -50,8 +52,9 @@ def meet_update(request, meet_id=None):
                                        meet_date=meet_date, meet_start=meet_start, meet_end=meet_end, meet_init=meet_init,
                                        meet_acc=meet_acc, meet_tel=meet_tel, meet_save=meet_save, meet_confident=meet_confident)
 
-            args['meetings'] = Meeting.objects.all().order_by('-meet_date', '-meet_start')
-            return render(request,'mt_table.html', args)
+            # args['meetings'] = Meeting.objects.all().order_by('-meet_date', '-meet_start')
+            # return render(request,'mt_table.html', args)
+            return meet_table(request)
 
     if meet_id:
         try:
@@ -84,3 +87,9 @@ def meet_copy(request, meet_id=None):
 
     return render(request,'mt_meetform.html', args)
 
+def members_update(request):
+    print(request.POST)
+    response = HttpResponse()
+    response['Content-Type'] = "text/javascript"
+    response.write("{user:%s,id:%s,result:%s}" % ('admin', 1, 1))
+    return response

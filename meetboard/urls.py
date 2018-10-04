@@ -21,5 +21,5 @@ from django.conf.urls import url, include
 urlpatterns = [
     path('', views.home, name='home'),
     path('meet/', include(('meetings.urls', 'meetings'), namespace='meetings')),
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls, name='admin'),
 ]
