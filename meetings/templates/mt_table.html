@@ -23,8 +23,31 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
+
       <div class="modal-body">
-        <p>Modal body text goes here.</p>
+          <button type="button" class="btn btn-outline-primary btn-sm" id="btn_addMember"><i class="fa fa-plus"></i> Добавить</button>
+          <table class="table table-sm table-hover" id="membersTable">
+              <thead>
+              <tr>
+                  <th scope="col">id</th>
+                  <th scope="col">Организация</th>
+                  <th scope="col">Фамилия</th>
+                  <th scope="col">Имя</th>
+                  <th scope="col">Отчество</th>
+                  <th scope="col">Должность</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                  <td class="tabledit-data">1</td>
+                  <td class="tabledit-data">2</td>
+                  <td class="tabledit-data">3</td>
+                  <td class="tabledit-data">4</td>
+                  <td class="tabledit-data">5</td>
+                  <td class="tabledit-data">6</td>
+              </tr>
+              </tbody>
+          </table>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
@@ -51,7 +74,7 @@
       {% for m in meetings %}
         <tr>
           <th scope="row">
-          <a href="{% url 'meetings:delete' m.id %}" data-toggle="tooltip" data-placement="top" title="Удалить совещание"><i class="fa fa-minus"></i></a>
+          <a href="{% url 'meetings:delete' m.id %}" data-toggle="tooltip" data-placement="top" title="Удалить совещание"><i class="fa fa-trash"></i></a>
           <a href="{% url 'meetings:update' m.id %}" data-toggle="tooltip" data-placement="top" title="Изменить данные"><i class="fa fa-edit"></i></a>
           <a href="{% url 'meetings:copy' m.id %}" data-toggle="tooltip" data-placement="top" title="Скопировать"><i class="fa fa-copy"></i></a>
           </th>
@@ -69,6 +92,7 @@
 {% endblock %}  {# content #}
 
 {% block js-block %}
+<script src="{% static "js/jquery.tabledit.min.js" %}"></script>
 <script type="text/javascript">
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
@@ -110,6 +134,30 @@ $(document).ready( function () {
                         }
         });
 } );
+
+$('#membersTable').Tabledit({
+    url: 'example.php',
+    columns: {
+        identifier: [0, 'id'],
+        editable: [[1, 'Организация'], [2, 'Фамилия'], [3, 'Имя'], [4, 'Отчетсво'], [5, 'Должность']]
+    }
+});
+
+$("#btn_addMember").click(function() {
+	var tableditTableName = '#membersTable';  // Identifier of table
+    //$(tableditTableName + ' tr:last').after('<tr><td class="tabledit-data"></td><td class="tabledit-data"></td><td class="tabledit-data"></td><td class="tabledit-data"></td><td class="tabledit-data"></td><td class="tabledit-data"></td></tr>');
+
+	//var newID = parseInt($(tableditTableName + " tr:last").attr("id")) + 1;
+	var clone = $(tableditTableName + " table tr:last").clone();
+	$(tableditTableName + ' tr:last').after(clone)
+	//$(tableditTableName + " .tabledit-span", clone).text("");
+	//$(tableditTableName + " .tabledit-input", clone).val("");
+	//clone.prependTo(tableditTableName + " table");
+	//$(tableditTableName + " tbody tr:first").attr("id", newID);
+	//$(tableditTableName + " tbody tr:first td .tabledit-span.tabledit-identifier").text(newID);
+	//$(tableditTableName + " tbody tr:first td .tabledit-input.tabledit-identifier").val(newID);
+	//$(tableditTableName + " tbody tr:first td:last .tabledit-edit-button").trigger("click");
+});
 
 </script>
 {% endblock %}
