@@ -30,7 +30,6 @@ class Meeting(models.Model):
     meet_tel = models.CharField(max_length=20, blank=True)
     meet_save = models.BooleanField(default=False)
     meet_confident = models.BooleanField(default=False)
-    members = models.ManyToManyField('Member', through='Meeting_Member')
     studios = models.ManyToManyField('Studio')
 
     def __str__(self):
@@ -43,13 +42,15 @@ class MeetingForm(ModelForm):
         fields = ['meet_type', 'meet_subj', 'meet_date', 'meet_start','meet_end', 'meet_place', 'meet_lead', 'meet_init', 'meet_acc', 'meet_tel']
 
 class Member(models.Model):
+    meeting = models.ForeignKey('Meeting', db_index=True, null=True, on_delete=models.SET_NULL)
     f = models.CharField(max_length=32,db_index=True)
     i = models.CharField(max_length=32, db_index=True)
     o = models.CharField(max_length=32, db_index=True, blank=True)
     fio = models.CharField(max_length=64, db_index=True)
     dol = models.CharField(max_length=128, db_index=True)
-    dep = models.ForeignKey('Dep',db_index=True, null=True, on_delete=models.SET_NULL)
-    is_speaker = models.BooleanField(default=False);
+    dep = models.CharField(max_length=64, db_index=True, default='')
+    is_speaker = models.IntegerField(default=0)
+    order_n = models.PositiveIntegerField(null=False, default=0)
 
     def __str__(self):
          return  self.fio
@@ -77,7 +78,7 @@ class Item(models.Model):
     def __str__(self):
         return self.description
 
-class Meeting_Member(models.Model):
-    meeting = models.ForeignKey('Meeting', db_index=True, on_delete=models.CASCADE)
-    member = models.ForeignKey('Member', db_index=True, on_delete=models.CASCADE)
-    order_n = models.IntegerField(null=False, default=0)
+# class Meeting_Member(models.Model):
+#     meeting = models.ForeignKey('Meeting', db_index=True, on_delete=models.CASCADE)
+#     member = models.ForeignKey('Member', db_index=True, on_delete=models.CASCADE)
+#     order_n = models.IntegerField(null=False, default=0)

@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.template.context_processors import csrf
 from django.http import HttpResponse
 
-from meetings.models import MEETING_TYPE_CHOICES, Meeting, MeetingForm, Dep
+from meetings.models import MEETING_TYPE_CHOICES, Meeting, MeetingForm, Dep, Member
 
 def home(request):
     args={}
@@ -88,6 +88,31 @@ def meet_copy(request, meet_id=None):
     return render(request,'mt_meetform.html', args)
 
 def members_update(request):
+    res = 1
+    if request.method == 'POST':
+        if request.POST:
+            res = 0
+            meet_id = int(request.POST.get('meet_id',None))
+            rowOrder = request.POST.get('membersTable_rowOrder',None)
+            rowOrder = map(int, rowOrder.split()) if rowOrder else None;
+            for index,o in enumerate(rowOrder):
+                id = request.POST.get('membersTable_id_{}'.format(o),0)
+                dep = request.POST.get('membersTable_dep_{}'.format(o),'')
+                f = request.POST.get('membersTable_f_{}'.format(o),'')
+                i= request.POST.get('membersTable_i_{}'.format(o),'')
+                o = request.POST.get('membersTable_o_{}'.format(o),'')
+                fio = "{} {}.{}.".format(f,i[0:1],o[0:1])
+                dol = request.POST.get('membersTable_dol_{}'.format(o),'')
+                is_speaker = request.POST.get('membersTable_is_speaker_{}'.format(o),0)
+                if id:
+                    Member.objects.update(id=id, dep=dep, f=f, i=i, o=o, dol=dol, is_speaker=is_speaker, fio = fio,
+                                          meeting__id=meet_id, order_n=index)
+                    print('Update {} {} {} {} {} {} {} {} {}'.format(dep, f, i, o, dol, is_speaker, fio, meet_id, index))
+                else:
+                    Member.objects.create(dep=dep, f=f, i=i, o=o, dol=dol, is_speaker=is_speaker, fio=fio,
+                                          meeting__id=meet_id, order_n=index)
+                    print('Create {} {} {} {} {} {} {} {} {}'.format(dep, f, i, o, dol, is_speaker, fio, meet_id, index))
+
     print(request.POST)
     response = HttpResponse()
     response['Content-Type'] = "text/javascript"

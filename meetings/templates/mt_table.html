@@ -30,6 +30,7 @@
           <table id="membersTable"> </table>
 
           <br>
+              <input type="hidden" name="meet_id" value="0" id="inp_meet_id"/>
           <button id="membersLoad" type="button">Load Data</button>
           <button id="membersSerialize" type="button">jQuery Serialize</button>
           </form>
@@ -94,7 +95,7 @@ $('#membersModal').on('show.bs.modal', function (event) {
   // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
   var modal = $(this);
   modal.find('.modal-title').html('Участники совещания: <b>"' + subj + '"</b><br>Дата совещания: <b>'+dt+'</b>')
-  //  modal.find('.modal-body input').val(recipient)
+  $('#inp_meet_id').attr('value',meet)
 
   // Удаляем все данные таблицы
   while ($('#membersTable').appendGrid('getRowCount')>0)  {
@@ -163,7 +164,7 @@ $(document).ready( function () {
         // Handle `Load` button click
         $('#membersLoad').button().click(function () {
             $('#membersTable').appendGrid('load', [
-                { 'dep': 5, 'f': 'Шелепнев', 'i': 'Дмитрий', 'o': 'Владимирович', 'dol': 'руководитель группы СЭиР ЛИУС', 'is_speaker':0, 'Id': 0 },
+                { 'dep': 'ООО "Газпром трансгаз Нижний Новгород"', 'f': 'Шелепнев', 'i': 'Дмитрий', 'o': 'Владимирович', 'dol': 'руководитель группы СЭиР ЛИУС', 'is_speaker':0, 'Id': 0 },
             ]);
         });
 
