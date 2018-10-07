@@ -161,51 +161,65 @@ $(document).ready( function () {
         });
 } );
 
-    $(function () {
-        $('#membersTable').appendGrid({caption: 'Участники совещания',
-            initRows: 0,
-            columns: [
-                { name: 'dep', display: 'Организация', ctrlCss: { width: '250px'}, type: 'select', ctrlOptions:
-                        [
-                            {% autoescape off %}
-                            {% for d in deps %}
-                                '{{ d.name }}',
-                            {% endfor %}
-                            {% endautoescape %}
-                        ] },
-                { name: 'f', display: 'Фамилия', type: 'text', ctrlAttr: { maxlength: 32 } },
-                { name: 'i', display: 'Имя', type: 'text', ctrlAttr: { maxlength: 32} },
-                { name: 'o', display: 'Отчество', type: 'text', ctrlAttr: { maxlength: 32} },
-                { name: 'dol', display: 'Должность', type: 'text', ctrlAttr: { maxlength: 64} },
-                { name: 'is_speaker', display: 'Докл.', type: 'checkbox' },
-                { name: 'Id', type: 'hidden', value: 0 },
-            ],
-            i18n: {
-                append: 'Добавить запись',
-                removeLast: 'Удалить последнюю запись',
-                insert: 'Вставить запись',
-                remove: 'Удалить запись',
-                moveUp: 'Вверх',
-                moveDown: 'Вниз',
-            }
-        });
-
-        // Handle `Save` button click
-        $('#membersSave').button().click(function () {
-            msg = $(document.forms[0]).serialize();
-            action_url = $('#members_form').attr("action");
-
-            $.ajax({
-                type: 'POST',
-                url: action_url,
-                data: msg,
-                success: function (data) {},
-                error: function (xhr, str) {}
-            });
-
-            $('#membersModal').modal('hide');
-            return false;
-        });
+$(function () {
+    $('#membersTable').appendGrid({caption: 'Участники совещания',
+        initRows: 0,
+        rowDragging: true,
+        hideButtons: { moveUp: true, moveDown: true },
+        columns: [
+            { name: 'dep', display: 'Организация', ctrlCss: { width: '250px'}, type: 'select', ctrlOptions:
+                    [
+                        {% autoescape off %}
+                        {% for d in deps %}
+                            '{{ d.name }}',
+                        {% endfor %}
+                        {% endautoescape %}
+                    ] },
+            { name: 'f', display: 'Фамилия', type: 'text', ctrlAttr: { maxlength: 32 } },
+            { name: 'i', display: 'Имя', type: 'text', ctrlAttr: { maxlength: 32} },
+            { name: 'o', display: 'Отчество', type: 'text', ctrlAttr: { maxlength: 32} },
+            { name: 'dol', display: 'Должность', type: 'text', ctrlAttr: { maxlength: 64} },
+            { name: 'is_speaker', display: 'Докл.', type: 'checkbox' },
+            { name: 'Id', type: 'hidden', value: 0 },
+        ],
+        customRowButtons: [
+              { uiButton: { icon: 'ui-icon-person', showLabel: false }, click: selectEmployee, btnCss: { 'min-width': '30px' }, btnAttr: { title: 'Выбрать сотрудника' }, atTheFront: true },
+        ],
+        i18n: {
+            append: 'Добавить запись',
+            removeLast: 'Удалить последнюю запись',
+            insert: 'Вставить запись',
+            remove: 'Удалить запись',
+            moveUp: 'Вверх',
+            moveDown: 'Вниз',
+        }
     });
+
+    // Handle `Save` button click
+    $('#membersSave').button().click(function () {
+        msg = $(document.forms[0]).serialize();
+        action_url = $('#members_form').attr("action");
+
+        $.ajax({
+            type: 'POST',
+            url: action_url,
+            data: msg,
+            success: function (data) {},
+            error: function (xhr, str) {}
+        });
+
+        $('#membersModal').modal('hide');
+        return false;
+    });
+});
+
+function selectEmployee(evtObj, uniqueIndex, rowData) {
+    alert('Возможно тут будет реализован функционал выбора запомненных сотрудников!!!');
+    // Check the caller button exist in event object
+    //if (evtObj && evtObj.target) {
+        // Do something on the button, such as disable the button
+    //    $(evtObj.target).button('disable');
+    //}
+}
 </script>
 {% endblock %}

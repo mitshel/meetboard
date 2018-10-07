@@ -119,7 +119,7 @@ def members_update(request):
                         id=Member.objects.create(dep=dep, f=f, i=i, o=o, dol=dol, is_speaker=is_speaker, fio=fio,
                                               meeting_id=meet_id, order_n=index).id
                     id_list.append(id)
-                    print(id, dep, f, i, o, dol, is_speaker, fio,meet_id, index)
+                    # print(id, dep, f, i, o, dol, is_speaker, fio,meet_id, index)
 
             Member.objects.filter(meeting_id=meet_id).exclude(id__in=id_list).delete()
 
