@@ -13,8 +13,29 @@
 
     <br>
 
+<!-- meetingDeleteModal -->
+<div class="modal" id="meetingDeleteModal" tabindex="-1" role="dialog" aria-labelledby="meetingDeleteModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="meetingDeleteModalTitle">Удаление совещания</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+           Вы действительно хотите удалить совещание <b>"<span></span>"</b>?
+      </div>
+      <div class="modal-footer">
+        <a type="button" class="btn btn-secondary" data-dismiss="modal" href="#">Выйти без удаления</a>
+        <a type="button" class="btn btn-primary" href="#" id="meetingDeleteButton">Удалить совещание</a>
+      </div>
+    </div>
+  </div>
+</div>
 
-<div class="modal  members-modal-lg" tabindex="-1" role="dialog" id="membersModal" data-backdrop="static" data-keyboard="false">
+<!-- membersModal -->
+<div class="modal members-modal-lg" tabindex="-1" role="dialog" id="membersModal" data-backdrop="static" data-keyboard="false">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -31,13 +52,11 @@
 
           <br>
               <input type="hidden" name="meet_id" value="0" id="inp_meet_id"/>
-          <button id="membersLoad" type="button">Load Data</button>
-          <button id="membersSerialize" type="button">jQuery Serialize</button>
           </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-        <button type="button" class="btn btn-primary">Сохранить</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" id="membersSave">Сохранить</button>
       </div>
     </div>
   </div>
@@ -60,7 +79,7 @@
       {% for m in meetings %}
         <tr>
           <th scope="row">
-          <a href="{% url 'meetings:delete' m.id %}" data-toggle="tooltip" data-placement="top" title="Удалить совещание"><i class="fa fa-trash"></i></a>
+          <a href="#" data-toggle="tooltip" data-placement="top" title="Удалить совещание" onClick="$('#meetingDeleteButton').attr('href','{% url 'meetings:delete' m.id %}');$('#meetingDeleteModal').find('div.modal-body').find('span').text('{{ m.meet_subj }}');$('#meetingDeleteModal').modal('show');"><i class="fa fa-trash"></i></a>
           <a href="{% url 'meetings:update' m.id %}" data-toggle="tooltip" data-placement="top" title="Изменить данные"><i class="fa fa-edit"></i></a>
           <a href="{% url 'meetings:copy' m.id %}" data-toggle="tooltip" data-placement="top" title="Скопировать"><i class="fa fa-copy"></i></a>
           </th>
@@ -87,22 +106,32 @@ $(function () {
 });
 
 $('#membersModal').on('show.bs.modal', function (event) {
-  var button = $(event.relatedTarget); // Button that triggered the modal
-  var meet = button.data('meet'); // Extract info from data-* attributes
-  var subj = button.data('subj'); // Extract info from data-* attributes
-  var dt = button.data('dt'); // Extract info from data-* attributes
-  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-  var modal = $(this);
-  modal.find('.modal-title').html('Участники совещания: <b>"' + subj + '"</b><br>Дата совещания: <b>'+dt+'</b>')
-  $('#inp_meet_id').attr('value',meet)
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var meet = button.data('meet'); // Extract info from data-* attributes
+    var subj = button.data('subj'); // Extract info from data-* attributes
+    var dt = button.data('dt'); // Extract info from data-* attributes
+    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+    var modal = $(this);
+    modal.find('.modal-title').html('Участники совещания: <b>"' + subj + '"</b><br>Дата совещания: <b>'+dt+'</b>')
+    $('#inp_meet_id').attr('value',meet)
 
-  // Удаляем все данные таблицы
-  while ($('#membersTable').appendGrid('getRowCount')>0)  {
+    // Удаляем все данные таблицы
+    while ($('#membersTable').appendGrid('getRowCount')>0)  {
       $('#membersTable').appendGrid('removeRow', 0);
-  };
+    };
 
- // Загружаем данные из БД
+    // Загружаем данные из БД
+    var request = $.ajax({
+        url: "{% url 'meetings:membersget' 999 %}".replace('999', meet),
+        type: "POST",
+        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+        dataType: "json",
+        success: function(msg) {
+            $('#membersTable').appendGrid('load', msg);
+        }
+    });
+
 });
 
 $(document).ready( function () {
@@ -161,18 +190,10 @@ $(document).ready( function () {
             }
         });
 
-        // Handle `Load` button click
-        $('#membersLoad').button().click(function () {
-            $('#membersTable').appendGrid('load', [
-                { 'dep': 'ООО "Газпром трансгаз Нижний Новгород"', 'f': 'Шелепнев', 'i': 'Дмитрий', 'o': 'Владимирович', 'dol': 'руководитель группы СЭиР ЛИУС', 'is_speaker':0, 'Id': 0 },
-            ]);
-        });
-
-        // Handle `Serialize` button click
-        $('#membersSerialize').button().click(function () {
+        // Handle `Save` button click
+        $('#membersSave').button().click(function () {
             msg = $(document.forms[0]).serialize();
             action_url = $('#members_form').attr("action");
-            alert('Here is the serialized data!!\n' + msg);
 
             $.ajax({
                 type: 'POST',
@@ -182,6 +203,7 @@ $(document).ready( function () {
                 error: function (xhr, str) {}
             });
 
+            $('#membersModal').modal('hide');
             return false;
         });
     });

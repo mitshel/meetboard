@@ -1,8 +1,12 @@
 import datetime
+import json
 
-from django.shortcuts import render
 from django.template.context_processors import csrf
 from django.http import HttpResponse
+from django.core import serializers
+from django.shortcuts import render, redirect
+from django.urls import reverse, reverse_lazy
+
 
 from meetings.models import MEETING_TYPE_CHOICES, Meeting, MeetingForm, Dep, Member
 
@@ -54,7 +58,8 @@ def meet_update(request, meet_id=None):
 
             # args['meetings'] = Meeting.objects.all().order_by('-meet_date', '-meet_start')
             # return render(request,'mt_table.html', args)
-            return meet_table(request)
+            #return meet_table(request)
+            return redirect(reverse("meetings:table"))
 
     if meet_id:
         try:
@@ -70,7 +75,7 @@ def meet_update(request, meet_id=None):
 
 def meet_delete(request, meet_id=None):
     Meeting.objects.filter(id=meet_id).delete()
-    return meet_table(request)
+    return redirect(reverse("meetings:table"))
 
 def meet_copy(request, meet_id=None):
     args = {}
@@ -92,29 +97,43 @@ def members_update(request):
     if request.method == 'POST':
         if request.POST:
             res = 0
+            id_list = []
             meet_id = int(request.POST.get('meet_id',None))
             rowOrder = request.POST.get('membersTable_rowOrder',None)
-            rowOrder = map(int, rowOrder.split()) if rowOrder else None;
-            for index,o in enumerate(rowOrder):
-                id = request.POST.get('membersTable_id_{}'.format(o),0)
-                dep = request.POST.get('membersTable_dep_{}'.format(o),'')
-                f = request.POST.get('membersTable_f_{}'.format(o),'')
-                i= request.POST.get('membersTable_i_{}'.format(o),'')
-                o = request.POST.get('membersTable_o_{}'.format(o),'')
-                fio = "{} {}.{}.".format(f,i[0:1],o[0:1])
-                dol = request.POST.get('membersTable_dol_{}'.format(o),'')
-                is_speaker = request.POST.get('membersTable_is_speaker_{}'.format(o),0)
-                if id:
-                    Member.objects.update(id=id, dep=dep, f=f, i=i, o=o, dol=dol, is_speaker=is_speaker, fio = fio,
-                                          meeting__id=meet_id, order_n=index)
-                    print('Update {} {} {} {} {} {} {} {} {}'.format(dep, f, i, o, dol, is_speaker, fio, meet_id, index))
-                else:
-                    Member.objects.create(dep=dep, f=f, i=i, o=o, dol=dol, is_speaker=is_speaker, fio=fio,
-                                          meeting__id=meet_id, order_n=index)
-                    print('Create {} {} {} {} {} {} {} {} {}'.format(dep, f, i, o, dol, is_speaker, fio, meet_id, index))
+            if rowOrder:
+                rowOrder = map(int, rowOrder.split(',')) if rowOrder else None;
+                for index, ordern in enumerate(rowOrder):
+                    id = request.POST.get('membersTable_id_{}'.format(ordern),0)
+                    dep = request.POST.get('membersTable_dep_{}'.format(ordern),'')
+                    f = request.POST.get('membersTable_f_{}'.format(ordern),'')
+                    i= request.POST.get('membersTable_i_{}'.format(ordern),'')
+                    o = request.POST.get('membersTable_o_{}'.format(ordern),'')
+                    fio = "{} {}{}{}{}".format(f,i[0:1],'.' if i!='' else '',o[0:1],'.' if o!='' else '')
+                    dol = request.POST.get('membersTable_dol_{}'.format(ordern),'')
+                    is_speaker = request.POST.get('membersTable_is_speaker_{}'.format(ordern),0)
 
-    print(request.POST)
+                    if id:
+                        Member.objects.update(id=id, dep=dep, f=f, i=i, o=o, dol=dol, is_speaker=is_speaker, fio = fio,
+                                              meeting_id=meet_id, order_n=index)
+                    else:
+                        id=Member.objects.create(dep=dep, f=f, i=i, o=o, dol=dol, is_speaker=is_speaker, fio=fio,
+                                              meeting_id=meet_id, order_n=index).id
+                    id_list.append(id)
+                    print(id, dep, f, i, o, dol, is_speaker, fio,meet_id, index)
+
+            Member.objects.filter(meeting_id=meet_id).exclude(id__in=id_list).delete()
+
     response = HttpResponse()
     response['Content-Type'] = "text/javascript"
-    response.write("{user:%s,id:%s,result:%s}" % ('admin', 1, 1))
+    response.write(json.dumps({'user':'admin','id':1,'result':res}))
     return response
+
+
+def members_get(request, meet_id=None):
+    if request.is_ajax():
+        members = Member.objects.filter(meeting__id=int(meet_id) if meet_id else 0).values()
+        #data = serializers.serialize('json', list(members), fields=('dep','f','i','o','dol','is_speaker','Id'))
+        data = json.dumps([dict(item) for item in members])
+        return HttpResponse(data,'json')
+
+    return meet_table(request)

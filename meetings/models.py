@@ -42,7 +42,7 @@ class MeetingForm(ModelForm):
         fields = ['meet_type', 'meet_subj', 'meet_date', 'meet_start','meet_end', 'meet_place', 'meet_lead', 'meet_init', 'meet_acc', 'meet_tel']
 
 class Member(models.Model):
-    meeting = models.ForeignKey('Meeting', db_index=True, null=True, on_delete=models.SET_NULL)
+    meeting = models.ForeignKey('Meeting', db_index=True, null=True, on_delete=models.CASCADE)
     f = models.CharField(max_length=32,db_index=True)
     i = models.CharField(max_length=32, db_index=True)
     o = models.CharField(max_length=32, db_index=True, blank=True)

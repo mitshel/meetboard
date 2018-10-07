@@ -9,4 +9,5 @@ urlpatterns = [
     path('delete/<str:meet_id>/', views.meet_delete, name='delete'),
     path('copy/<str:meet_id>/', views.meet_copy, name='copy'),
     path('membersupd/', views.members_update, name='membersupd'),
+    path('membersget/<str:meet_id>/', views.members_get, name='membersget'),
 ]
