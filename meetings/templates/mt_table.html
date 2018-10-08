@@ -97,7 +97,7 @@
     <!-- ------------------------------------------- -->
     <!-- studiosModal ------------------------------ -->
     <!-- ------------------------------------------- -->
-    <div class="modal studios-modal-lg" tabindex="-1" role="dialog" id="itemsModal" data-backdrop="static" data-keyboard="false">
+    <div class="modal studios-modal-lg" tabindex="-1" role="dialog" id="studiosModal" data-backdrop="static" data-keyboard="false">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -318,6 +318,7 @@ $('#itemsModal').on('show.bs.modal', function (event) {
         dataType: "json",
         success: function(msg) {
             $('#itemsTable').appendGrid('load', msg);
+            $('#itemsTable').appendGrid('load', msg);
         }
     });
 
@@ -425,7 +426,6 @@ $('#studiosModal').on('show.bs.modal', function (event) {
             $('#studiosTable').appendGrid('load', msg);
         }
     });
-
 });
 
 $(function () {
@@ -434,16 +434,25 @@ $(function () {
         rowDragging: true,
         hideButtons: { moveUp: true, moveDown: true },
         columns: [
-            { name: 'dep', display: 'Организация', ctrlCss: { width: '250px'}, type: 'select',
-                ctrlOptions: {
+            { name: 'studio__dep_id', display: 'Организация', ctrlCss: { width: '250px'}, type: 'select',
+                ctrlOptions: [
                     {% autoescape off %}
+                        {value:0, label : '{Выберите организацию}'},
                         {% for d in deps %}
-                            {{ d.id }} : '{{ d.name }}',
+                            {% if d.studios_cnt > 0 %}
+                                { value:{{ d.id }}, label : '{{ d.name }}'},
+                            {% endif %}
                         {% endfor %}
                     {% endautoescape %}
-                },
+                ],
                 onChange: handle_studiosTableChange_dep,
             },
+            {
+                name: 'studio_id', display: 'Адрес студии', type: 'select',
+                ctrlOptions: { 0: '{Выполните выбор нужной студии для совещания}' },
+                onChange: handle_studiosTableChange_addr,
+            },
+            //{ name: 'studio_type', display: 'Тип', type: 'select', ctrlOptions: {0:'-', 1:'Видео', 2:'Аудио'}, ctrlAttr: { disabled: 'disabled' } },
             { name: 'Id', type: 'hidden', value: 0 },
         ],
         i18n: {
@@ -453,18 +462,61 @@ $(function () {
             remove: 'Удалить запись',
             moveUp: 'Вверх',
             moveDown: 'Вниз',
+        },
+        // Поскольку каскадный выпадающий список пуст при вставке строки,
+        // требуется после этого генерировать параметры и заполнять значения.
+        rowDataLoaded: function (caller, record, rowIndex, uniqueIndex) {
+            // Trigger rebuild the cascade drop down list if there is a valid value assigned
+            if (0 < record.studio__dep_id) {
+                var dep = $('#studiosTable').appendGrid('getCellCtrl', 'studio__dep_id', rowIndex);
+                $(dep).trigger('change');
+                // Check value of cascade 2
+                var studio = $('#studiosTable').appendGrid('getCellCtrl', 'studio_id', rowIndex);
+                if (0 < record.studio_id) {
+                    $(studio).val(record.studio_id).trigger('change');
+                }
+            }
         }
     });
 
     function handle_studiosTableChange_dep(evt, rowIndex) {
+        // Get the select elements
+        var elem1 = evt.target;
+        var elem2 = $('#studiosTable').appendGrid('getCellCtrl', 'studio_id', rowIndex);
+        var elem3 = $('#studiosTable').appendGrid('getCellCtrl', 'studio_type', rowIndex);
+        // Clear the generated options in elem2 and elem3
+        elem2.options.length = 1;
+        // Check if user selected a valid option
+        if (0 < elem1.selectedIndex) {
+            // Загружаем данные из БД для elem2
+            $.ajax({
+                url: "{% url 'meetings:studiosget_bydep' 999 %}".replace('999', elem1.value),
+                type: "POST",
+                async: false,
+                data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                dataType: "json",
+                success: function(msg) {
+                            $.each(msg, function(key, val) {
+                                elem2.options[key+1]=new Option(label=val.studio_addr, value=val.id);
+	                        });
+                }
+            });
+        }
+    }
+    function handle_studiosTableChange_addr(evt, rowIndex) {
+        var elem2 = evt.target;
+        var elem3 = $('#studiosTable').appendGrid('getCellCtrl', 'studio_type', rowIndex);
+        //if (0 < elem2.selectedIndex) {
+        //    if (elem2.prefix=='V') { elem3.selectedIndex=1 }
+        //    else if (elem2.prefix=='A') { elem3.selectedIndex=2 }
+        //    else { elem3.selectedIndex=0 };
+        //}
         return false;
     }
-
     // Handle `Save` button click
     $('#studiosSave').button().click(function () {
         msg = $(document.forms[2]).serialize();
         action_url = $('#studios_form').attr("action");
-
         $.ajax({
             type: 'POST',
             url: action_url,

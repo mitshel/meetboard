@@ -35,12 +35,6 @@ class Meeting(models.Model):
     def __str__(self):
          return  str(self.meet_date) +' | '+ self.meet_subj
 
-
-class MeetingForm(ModelForm):
-    class Meta:
-        model = Meeting
-        fields = ['meet_type', 'meet_subj', 'meet_date', 'meet_start','meet_end', 'meet_place', 'meet_lead', 'meet_init', 'meet_acc', 'meet_tel']
-
 class Member(models.Model):
     meeting = models.ForeignKey('Meeting', db_index=True, null=True, on_delete=models.CASCADE)
     dep = models.CharField(max_length=64, db_index=True, default='')
@@ -69,6 +63,11 @@ class Studio(models.Model):
     def __str__(self):
         return self.studio_addr
 
+class StudioList(models.Model):
+    meeting = models.ForeignKey('Meeting', db_index=True, null=True, on_delete=models.CASCADE)
+    studio = models.ForeignKey('Studio', db_index=True, null=True, on_delete=models.CASCADE)
+    order_n = models.PositiveIntegerField(null=False, default=0)
+
 class Item(models.Model):
     meeting = models.ForeignKey('Meeting', db_index=True, null=True, on_delete=models.CASCADE)
     item_subj = models.CharField(max_length=256)
@@ -82,8 +81,3 @@ class Item(models.Model):
 
     def __str__(self):
         return self.description
-
-# class Meeting_Member(models.Model):
-#     meeting = models.ForeignKey('Meeting', db_index=True, on_delete=models.CASCADE)
-#     member = models.ForeignKey('Member', db_index=True, on_delete=models.CASCADE)
-#     order_n = models.IntegerField(null=False, default=0)

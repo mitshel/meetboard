@@ -14,4 +14,5 @@ urlpatterns = [
     path('itemsget/<str:meet_id>/', views.items_get, name='itemsget'),
     path('studiosupd/', views.studios_update, name='studiosupd'),
     path('studiosget/<str:meet_id>/', views.studios_get, name='studiosget'),
+    path('studiosget_bydep/<str:dep_id>/', views.studios_get_bydep, name='studiosget_bydep'),
 ]

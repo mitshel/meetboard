@@ -6,9 +6,10 @@ from django.http import HttpResponse
 from django.core import serializers
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
+from django.db.models import Count
 
 
-from meetings.models import MEETING_TYPE_CHOICES, Meeting, MeetingForm, Dep, Member, Item, Studio
+from meetings.models import MEETING_TYPE_CHOICES, Meeting, Dep, Member, Item, Studio, StudioList
 
 def home(request):
     args={}
@@ -18,7 +19,7 @@ def meet_table(request):
     args={}
 
     args['meetings'] = Meeting.objects.all().order_by('-meet_date','-meet_start')
-    args['deps'] = Dep.objects.all().order_by('name')
+    args['deps'] = Dep.objects.all().annotate(studios_cnt=Count('studio')).order_by('name')
     return render(request,'mt_table.html', args)
 
 def meet_update(request, meet_id=None):
@@ -187,12 +188,52 @@ def items_get(request, meet_id=None):
 
     return meet_table(request)
 
-def items_get(request, meet_id=None):
+def studios_update(request):
+    res = 1
+    if request.method == 'POST':
+        if request.POST:
+            res = 0
+            id_list = []
+            meet_id = int(request.POST.get('meet_id', 0))
+            rowOrder = request.POST.get('studiosTable_rowOrder', None)
+            print('>>> {} {}'.format(meet_id, rowOrder))
+            if rowOrder and meet_id:
+                rowOrder = map(int, rowOrder.split(',')) if rowOrder else None;
+                for index, ordern in enumerate(rowOrder):
+                    id = int(request.POST.get('studiosTable_id_{}'.format(ordern), 0))
+                    studio_id = int(request.POST.get('studiosTable_studio_id_{}'.format(ordern), 0))
+                    if id:
+                        StudioList.objects.update(id=id, studio_id=studio_id, meeting_id=meet_id, order_n=index)
+                    else:
+                        id = StudioList.objects.create(studio_id=studio_id, meeting_id=meet_id, order_n=index).id
+                    id_list.append(id)
+                    print(id, studio_id, meet_id, index)
+
+            StudioList.objects.filter(meeting_id=meet_id).exclude(id__in=id_list).delete()
+
+    response = HttpResponse()
+    response['Content-Type'] = "text/javascript"
+    response.write(json.dumps({'user':'admin','id':1,'result':res}))
+    return response
+
+def studios_get(request, meet_id=None):
     if request.is_ajax():
         meet_id = int(meet_id) if meet_id else 0
 
-        studios = Studio.objects.filter(meeting__id=meet_id).values()
+        studios = StudioList.objects.filter(meeting__id=meet_id).order_by('order_n').values('id','meeting_id','studio__dep_id', 'studio_id')
         data = json.dumps([dict(item) for item in studios])
+        print(data)
+        return HttpResponse(data,'json')
+
+    return meet_table(request)
+
+def studios_get_bydep(request, dep_id=None):
+    if request.is_ajax():
+        dep_id = int(dep_id) if dep_id else 0
+
+        studios = Studio.objects.filter(dep=dep_id)
+        data = json.dumps([{'id':item.id,'studio_addr':item.studio_addr,'studio_type':item.studio_type} for item in studios])
+        print('dep:{} data:{}'.format(dep_id,data))
         return HttpResponse(data,'json')
 
     return meet_table(request)
