@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 
 
-from meetings.models import MEETING_TYPE_CHOICES, Meeting, MeetingForm, Dep, Member, Item
+from meetings.models import MEETING_TYPE_CHOICES, Meeting, MeetingForm, Dep, Member, Item, Studio
 
 def home(request):
     args={}
@@ -183,6 +183,16 @@ def items_get(request, meet_id=None):
 
         items = Item.objects.filter(meeting__id=meet_id).order_by('order_n').values()
         data = json.dumps([dict(item) for item in items])
+        return HttpResponse(data,'json')
+
+    return meet_table(request)
+
+def items_get(request, meet_id=None):
+    if request.is_ajax():
+        meet_id = int(meet_id) if meet_id else 0
+
+        studios = Studio.objects.filter(meeting__id=meet_id).values()
+        data = json.dumps([dict(item) for item in studios])
         return HttpResponse(data,'json')
 
     return meet_table(request)

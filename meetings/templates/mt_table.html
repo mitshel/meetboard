@@ -95,6 +95,36 @@
     </div>
 
     <!-- ------------------------------------------- -->
+    <!-- studiosModal ------------------------------ -->
+    <!-- ------------------------------------------- -->
+    <div class="modal studios-modal-lg" tabindex="-1" role="dialog" id="itemsModal" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+              <span class="modal-title">Студии</span>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+          <div class="modal-body mx-auto">
+              <form action="{% url 'meetings:studiosupd' %}" method="post" id="studios_form">
+              {% csrf_token %}
+              <table id="studiosTable"> </table>
+              <input type="hidden" name="meet_id" value="0" id="studios_meet_id"/>
+              <br>
+              </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal" id="studiosSave">Сохранить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ------------------------------------------- -->
     <!-- meetTable          ------------------------ -->
     <!-- ------------------------------------------- -->
     <table class="table table-sm table-hover display" id="meetTable">
@@ -124,7 +154,7 @@
           <td>{{ m.meet_start }}-{{ m.meet_end }}</td>
           <td><a href="#" data-toggle="modal" data-target=".members-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Участники</a></td>
           <td><a href="#" data-toggle="modal" data-target=".items-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Повестка</a></td>
-          <td><a href="#">Студии</a></td>
+          <td><a href="#" data-toggle="modal" data-target=".studios-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Студии</a></td>
         </tr>
       {% endfor %}
       </tbody>
@@ -363,6 +393,87 @@ $(function () {
         });
 
         $('#itemsModal').modal('hide');
+        return false;
+    });
+});
+
+////////////////////////////////////////////////////////////////
+// studiosModal Settings and Functions
+//
+$('#studiosModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var meet = button.data('meet'); // Extract info from data-* attributes
+    var subj = button.data('subj'); // Extract info from data-* attributes
+    var dt = button.data('dt'); // Extract info from data-* attributes
+
+    var modal = $('#studiosModal');
+    modal.find('.modal-title').html('Студии совещания: <b>"' + subj + '"</b><br>Дата совещания: <b>'+dt+'</b>');
+    $('#studios_meet_id').attr('value',meet);
+
+    // Удаляем все данные таблицы
+    while ($('#studiosTable').appendGrid('getRowCount')>0)  {
+      $('#studiosTable').appendGrid('removeRow', 0);
+    };
+
+    // Загружаем данные из БД
+    var request = $.ajax({
+        url: "{% url 'meetings:studiosget' 999 %}".replace('999', meet),
+        type: "POST",
+        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+        dataType: "json",
+        success: function(msg) {
+            $('#studiosTable').appendGrid('load', msg);
+        }
+    });
+
+});
+
+$(function () {
+    $('#studiosTable').appendGrid({caption: 'Студии совещания',
+        initRows: 0,
+        rowDragging: true,
+        hideButtons: { moveUp: true, moveDown: true },
+        columns: [
+            { name: 'dep', display: 'Организация', ctrlCss: { width: '250px'}, type: 'select',
+                ctrlOptions: {
+                    {% autoescape off %}
+                        {% for d in deps %}
+                            {{ d.id }} : '{{ d.name }}',
+                        {% endfor %}
+                    {% endautoescape %}
+                },
+                onChange: handle_studiosTableChange_dep,
+            },
+            { name: 'Id', type: 'hidden', value: 0 },
+        ],
+        i18n: {
+            append: 'Добавить запись',
+            removeLast: 'Удалить последнюю запись',
+            insert: 'Вставить запись',
+            remove: 'Удалить запись',
+            moveUp: 'Вверх',
+            moveDown: 'Вниз',
+        }
+    });
+
+    function handle_studiosTableChange_dep(evt, rowIndex) {
+        return false;
+    }
+
+    // Handle `Save` button click
+    $('#studiosSave').button().click(function () {
+        msg = $(document.forms[2]).serialize();
+        action_url = $('#studios_form').attr("action");
+
+        $.ajax({
+            type: 'POST',
+            url: action_url,
+            data: msg,
+            success: function (data) {},
+            error: function (xhr, str) {}
+        });
+
+        $('#studiosModal').modal('hide');
         return false;
     });
 });
