@@ -10,4 +10,6 @@ urlpatterns = [
     path('copy/<str:meet_id>/', views.meet_copy, name='copy'),
     path('membersupd/', views.members_update, name='membersupd'),
     path('membersget/<str:meet_id>/', views.members_get, name='membersget'),
+    path('itemsupd/', views.items_update, name='itemsupd'),
+    path('itemsget/<str:meet_id>/', views.items_get, name='itemsget'),
 ]

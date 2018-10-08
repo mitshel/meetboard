@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 
 
-from meetings.models import MEETING_TYPE_CHOICES, Meeting, MeetingForm, Dep, Member
+from meetings.models import MEETING_TYPE_CHOICES, Meeting, MeetingForm, Dep, Member, Item
 
 def home(request):
     args={}
@@ -98,9 +98,9 @@ def members_update(request):
         if request.POST:
             res = 0
             id_list = []
-            meet_id = int(request.POST.get('meet_id',None))
+            meet_id = int(request.POST.get('meet_id',0))
             rowOrder = request.POST.get('membersTable_rowOrder',None)
-            if rowOrder:
+            if rowOrder and meet_id:
                 rowOrder = map(int, rowOrder.split(',')) if rowOrder else None;
                 for index, ordern in enumerate(rowOrder):
                     id = request.POST.get('membersTable_id_{}'.format(ordern),0)
@@ -128,12 +128,61 @@ def members_update(request):
     response.write(json.dumps({'user':'admin','id':1,'result':res}))
     return response
 
-
 def members_get(request, meet_id=None):
     if request.is_ajax():
         members = Member.objects.filter(meeting__id=int(meet_id) if meet_id else 0).values()
         #data = serializers.serialize('json', list(members), fields=('dep','f','i','o','dol','is_speaker','Id'))
         data = json.dumps([dict(item) for item in members])
+        return HttpResponse(data,'json')
+
+    return meet_table(request)
+
+def items_update(request):
+    res = 1
+    if request.method == 'POST':
+        if request.POST:
+            res = 0
+            id_list = []
+            meet_id = int(request.POST.get('meet_id',0))
+            rowOrder = request.POST.get('itemsTable_rowOrder',None)
+            if rowOrder and meet_id:
+                rowOrder = map(int, rowOrder.split(',')) if rowOrder else None;
+                for index, ordern in enumerate(rowOrder):
+                    id = request.POST.get('itemsTable_id_{}'.format(ordern),0)
+                    dep = request.POST.get('itemsTable_dep_{}'.format(ordern),'')
+                    f = request.POST.get('itemsTable_f_{}'.format(ordern),'')
+                    i= request.POST.get('itemsTable_i_{}'.format(ordern),'')
+                    o = request.POST.get('itemsTable_o_{}'.format(ordern),'')
+                    dol = request.POST.get('itemsTable_dol_{}'.format(ordern),'')
+                    item_time = request.POST.get('itemsTable_item_time_{}'.format(ordern),0)
+                    item_subj = request.POST.get('itemsTable_item_subj_{}'.format(ordern), 0)
+
+                    if id:
+                        Item.objects.update(id=id, dep=dep, f=f, i=i, o=o, dol=dol, item_time=item_time, item_subj = item_subj,
+                                              meeting_id=meet_id, order_n=index)
+                    else:
+                        id=Item.objects.create(dep=dep, f=f, i=i, o=o, dol=dol, item_time=item_time, item_subj = item_subj,
+                                              meeting_id=meet_id, order_n=index).id
+                    id_list.append(id)
+                    print(id, dep, f, i, o, dol, item_time, item_subj, meet_id, index)
+
+            Item.objects.filter(meeting_id=meet_id).exclude(id__in=id_list).delete()
+
+    response = HttpResponse()
+    response['Content-Type'] = "text/javascript"
+    response.write(json.dumps({'user':'admin','id':1,'result':res}))
+    return response
+
+def items_get(request, meet_id=None):
+    if request.is_ajax():
+        meet_id = int(meet_id) if meet_id else 0
+        items_count = Item.objects.filter(meeting__id=meet_id).count()
+        if items_count==0:
+            for index, m in enumerate(Member.objects.filter(meeting__id=meet_id, is_speaker=1).order_by('order_n')):
+                Item.objects.create(dep=m.dep, f=m.f, i=m.i, o=m.o, dol=m.dol, meeting_id=meet_id, order_n=index)
+
+        items = Item.objects.filter(meeting__id=meet_id).order_by('order_n').values()
+        data = json.dumps([dict(item) for item in items])
         return HttpResponse(data,'json')
 
     return meet_table(request)

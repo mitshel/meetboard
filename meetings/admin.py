@@ -22,7 +22,7 @@ class Studio_admin(admin.ModelAdmin):
     list_display = ('dep', 'studio_addr', 'studio_type')
 
 class Item_admin(admin.ModelAdmin):
-    list_display = ('otv', 'meet', 'description', 'tm')
+    list_display = ('item_subj', 'item_time', 'dep', 'f', 'i', 'o', 'dol')
 
 
 admin.site.register(Meeting, Meeting_admin)

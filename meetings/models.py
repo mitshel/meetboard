@@ -43,12 +43,12 @@ class MeetingForm(ModelForm):
 
 class Member(models.Model):
     meeting = models.ForeignKey('Meeting', db_index=True, null=True, on_delete=models.CASCADE)
+    dep = models.CharField(max_length=64, db_index=True, default='')
     f = models.CharField(max_length=32,db_index=True)
     i = models.CharField(max_length=32, db_index=True)
     o = models.CharField(max_length=32, db_index=True, blank=True)
     fio = models.CharField(max_length=64, db_index=True)
     dol = models.CharField(max_length=128, db_index=True)
-    dep = models.CharField(max_length=64, db_index=True, default='')
     is_speaker = models.IntegerField(default=0)
     order_n = models.PositiveIntegerField(null=False, default=0)
 
@@ -70,10 +70,15 @@ class Studio(models.Model):
         return self.studio_addr
 
 class Item(models.Model):
-    otv = models.ForeignKey('Member', db_index=True, null=True, on_delete=models.SET_NULL)
-    meet = models.ForeignKey('Meeting', db_index=True, on_delete=models.CASCADE)
-    description = models.CharField(max_length=256)
-    tm = models.CharField(max_length=16, db_index=True)
+    meeting = models.ForeignKey('Meeting', db_index=True, null=True, on_delete=models.CASCADE)
+    item_subj = models.CharField(max_length=256)
+    item_time = models.CharField(max_length=16, db_index=True)
+    dep = models.CharField(max_length=64, db_index=True, default='')
+    f = models.CharField(max_length=32,db_index=True)
+    i = models.CharField(max_length=32, db_index=True)
+    o = models.CharField(max_length=32, db_index=True, blank=True)
+    dol = models.CharField(max_length=128, db_index=True)
+    order_n = models.PositiveIntegerField(null=False, default=0)
 
     def __str__(self):
         return self.description

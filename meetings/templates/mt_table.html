@@ -13,55 +13,90 @@
 
     <br>
 
-<!-- meetingDeleteModal -->
-<div class="modal" id="meetingDeleteModal" tabindex="-1" role="dialog" aria-labelledby="meetingDeleteModalTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="meetingDeleteModalTitle">Удаление совещания</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-           Вы действительно хотите удалить совещание <b>"<span></span>"</b>?
-      </div>
-      <div class="modal-footer">
-        <a type="button" class="btn btn-secondary" data-dismiss="modal" href="#">Выйти без удаления</a>
-        <a type="button" class="btn btn-primary" href="#" id="meetingDeleteButton">Удалить совещание</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- membersModal -->
-<div class="modal members-modal-lg" tabindex="-1" role="dialog" id="membersModal" data-backdrop="static" data-keyboard="false">
-  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-          <span class="modal-title">Участники совещания</span>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <div class="modal-body mx-auto">
-          <form action="{% url 'meetings:membersupd' %}" method="post" id="members_form">
-          {% csrf_token %}
-          <table id="membersTable"> </table>
-
-          <br>
-              <input type="hidden" name="meet_id" value="0" id="inp_meet_id"/>
-          </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal" id="membersSave">Сохранить</button>
+    <!-- ------------------------------------------- -->
+    <!-- meetingDeleteModal ------------------------ -->
+    <!-- ------------------------------------------- -->
+    <div class="modal" id="meetingDeleteModal" tabindex="-1" role="dialog" aria-labelledby="meetingDeleteModalTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="meetingDeleteModalTitle">Удаление совещания</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+               Вы действительно хотите удалить совещание <b>"<span></span>"</b>?
+          </div>
+          <div class="modal-footer">
+            <a type="button" class="btn btn-secondary" data-dismiss="modal" href="#">Выйти без удаления</a>
+            <a type="button" class="btn btn-primary" href="#" id="meetingDeleteButton">Удалить совещание</a>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
+    <!-- ------------------------------------------- -->
+    <!-- membersModal ------------------------------ -->
+    <!-- ------------------------------------------- -->
+    <div class="modal members-modal-lg" tabindex="-1" role="dialog" id="membersModal" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+              <span class="modal-title">Участники совещания</span>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+          <div class="modal-body mx-auto">
+              <form action="{% url 'meetings:membersupd' %}" method="post" id="members_form">
+              {% csrf_token %}
+              <table id="membersTable"> </table>
+              <input type="hidden" name="meet_id" value="0" id="members_meet_id"/>
+              <br>
+              </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal" id="membersSave">Сохранить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------- -->
+    <!-- itemsModal -------------------------------- -->
+    <!-- ------------------------------------------- -->
+    <div class="modal items-modal-lg" tabindex="-1" role="dialog" id="itemsModal" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+              <span class="modal-title">Повестка совещания</span>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+          <div class="modal-body mx-auto">
+              <form action="{% url 'meetings:itemsupd' %}" method="post" id="items_form">
+              {% csrf_token %}
+              <table id="itemsTable"> </table>
+              <input type="hidden" name="meet_id" value="0" id="items_meet_id"/>
+              <br>
+              </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal" id="itemsSave">Сохранить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------- -->
+    <!-- meetTable          ------------------------ -->
+    <!-- ------------------------------------------- -->
     <table class="table table-sm table-hover display" id="meetTable">
       <thead>
         <tr>
@@ -87,8 +122,8 @@
           <td>{{ m.meet_subj }}</td>
           <td>{{ m.meet_place }}</td>
           <td>{{ m.meet_start }}-{{ m.meet_end }}</td>
-            <td><a href="#" data-toggle="modal" data-target=".members-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Участники</a></td>
-          <td><a href="#">Повестка</a></td>
+          <td><a href="#" data-toggle="modal" data-target=".members-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Участники</a></td>
+          <td><a href="#" data-toggle="modal" data-target=".items-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Повестка</a></td>
           <td><a href="#">Студии</a></td>
         </tr>
       {% endfor %}
@@ -101,37 +136,11 @@
 <script type="text/javascript" src="{% static "appendGrid/jquery.appendGrid-1.7.1.min.js" %}"></script>
 <script type="text/javascript">
 
+////////////////////////////////////////////////////////////////
+// meetTable Settings and Functions
+//
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
-});
-
-$('#membersModal').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget); // Button that triggered the modal
-    var meet = button.data('meet'); // Extract info from data-* attributes
-    var subj = button.data('subj'); // Extract info from data-* attributes
-    var dt = button.data('dt'); // Extract info from data-* attributes
-    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-    var modal = $(this);
-    modal.find('.modal-title').html('Участники совещания: <b>"' + subj + '"</b><br>Дата совещания: <b>'+dt+'</b>')
-    $('#inp_meet_id').attr('value',meet)
-
-    // Удаляем все данные таблицы
-    while ($('#membersTable').appendGrid('getRowCount')>0)  {
-      $('#membersTable').appendGrid('removeRow', 0);
-    };
-
-    // Загружаем данные из БД
-    var request = $.ajax({
-        url: "{% url 'meetings:membersget' 999 %}".replace('999', meet),
-        type: "POST",
-        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
-        dataType: "json",
-        success: function(msg) {
-            $('#membersTable').appendGrid('load', msg);
-        }
-    });
-
 });
 
 $(document).ready( function () {
@@ -161,6 +170,37 @@ $(document).ready( function () {
         });
 } );
 
+////////////////////////////////////////////////////////////////
+// membersModal Settings and Functions
+//
+$('#membersModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var meet = button.data('meet'); // Extract info from data-* attributes
+    var subj = button.data('subj'); // Extract info from data-* attributes
+    var dt = button.data('dt'); // Extract info from data-* attributes
+
+    var modal = $('#membersModal');
+    modal.find('.modal-title').html('Участники совещания: <b>"' + subj + '"</b><br>Дата совещания: <b>'+dt+'</b>');
+    $('#members_meet_id').attr('value',meet);
+
+    // Удаляем все данные таблицы
+    while ($('#membersTable').appendGrid('getRowCount')>0)  {
+      $('#membersTable').appendGrid('removeRow', 0);
+    };
+
+    // Загружаем данные из БД
+    var request = $.ajax({
+        url: "{% url 'meetings:membersget' 999 %}".replace('999', meet),
+        type: "POST",
+        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+        dataType: "json",
+        success: function(msg) {
+            $('#membersTable').appendGrid('load', msg);
+        }
+    });
+
+});
+
 $(function () {
     $('#membersTable').appendGrid({caption: 'Участники совещания',
         initRows: 0,
@@ -182,9 +222,9 @@ $(function () {
             { name: 'is_speaker', display: 'Докл.', type: 'checkbox' },
             { name: 'Id', type: 'hidden', value: 0 },
         ],
-        customRowButtons: [
-              { uiButton: { icon: 'ui-icon-person', showLabel: false }, click: selectEmployee, btnCss: { 'min-width': '30px' }, btnAttr: { title: 'Выбрать сотрудника' }, atTheFront: true },
-        ],
+        //customRowButtons: [
+        //      { uiButton: { icon: 'ui-icon-person', showLabel: false }, click: selectEmployee, btnCss: { 'min-width': '30px' }, btnAttr: { title: 'Выбрать сотрудника' }, atTheFront: true },
+        //],
         i18n: {
             append: 'Добавить запись',
             removeLast: 'Удалить последнюю запись',
@@ -221,5 +261,110 @@ function selectEmployee(evtObj, uniqueIndex, rowData) {
     //    $(evtObj.target).button('disable');
     //}
 }
+
+////////////////////////////////////////////////////////////////
+// itemsModal Settings and Functions
+//
+$('#itemsModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var meet = button.data('meet'); // Extract info from data-* attributes
+    var subj = button.data('subj'); // Extract info from data-* attributes
+    var dt = button.data('dt'); // Extract info from data-* attributes
+
+    var modal = $('#itemsModal');
+    modal.find('.modal-title').html('Повестка совещания: <b>"' + subj + '"</b><br>Дата совещания: <b>'+dt+'</b>');
+    $('#items_meet_id').attr('value',meet);
+
+    // Удаляем все данные таблицы
+    while ($('#itemsTable').appendGrid('getRowCount')>0)  {
+      $('#itemsTable').appendGrid('removeRow', 0);
+    };
+
+    // Загружаем данные из БД
+    var request = $.ajax({
+        url: "{% url 'meetings:itemsget' 999 %}".replace('999', meet),
+        type: "POST",
+        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+        dataType: "json",
+        success: function(msg) {
+            $('#itemsTable').appendGrid('load', msg);
+        }
+    });
+
+});
+
+$(function () {
+    $('#itemsTable').appendGrid({caption: 'Повестка совещания',
+        initRows: 0,
+        columns: [
+            { name: 'dep', display: 'Организация', ctrlCss: { width: '250px'}, type: 'select', ctrlOptions:
+                    [
+                        {% autoescape off %}
+                        {% for d in deps %}
+                            '{{ d.name }}',
+                        {% endfor %}
+                        {% endautoescape %}
+                    ] },
+            { name: 'f', display: 'Фамилия', type: 'text', ctrlAttr: { maxlength: 32 } },
+            { name: 'i', display: 'Имя', type: 'text', ctrlAttr: { maxlength: 32} },
+            { name: 'o', display: 'Отчество', type: 'text', ctrlAttr: { maxlength: 32} },
+            { name: 'dol', display: 'Должность', type: 'text', ctrlAttr: { maxlength: 64} },
+            { name: 'item_time', display: 'Время', type: 'text', ctrlAttr: { maxlength: 32} },
+            { name: 'Id', type: 'hidden', value: 0 },
+        ],
+        //customRowButtons: [
+        //      { uiButton: { icon: 'ui-icon-person', showLabel: false }, click: selectEmployee, btnCss: { 'min-width': '30px' }, btnAttr: { title: 'Выбрать сотрудника' }, atTheFront: true },
+        //],
+        i18n: {
+            append: 'Добавить запись',
+            removeLast: 'Удалить последнюю запись',
+            insert: 'Вставить запись',
+            remove: 'Удалить запись',
+            moveUp: 'Вверх',
+            moveDown: 'Вниз',
+        },
+        useSubPanel: true,
+        subPanelBuilder: function (cell, uniqueIndex) {
+            // Create a label
+            $('<span></span>').text('Тема выступления: ').appendTo(cell);
+            // Create a text area
+            $('<textarea></textarea>').css('vertical-align', 'middle').attr({
+                id: 'itemsTable_item_subj_' + uniqueIndex,
+                name: 'itemsTable_item_subj_' + uniqueIndex,
+                rows: 1, cols: 140
+            }).appendTo(cell);
+        },
+        subPanelGetter: function (uniqueIndex) {
+            // Return the element value inside sub panel for `getAllValue` and `getRowValue` methods
+            return { 'item_subj': $('#itemsTable_item_subj_' + uniqueIndex).val() };
+        },
+        rowDataLoaded: function (caller, record, rowIndex, uniqueIndex) {
+            // Check the record contains `item_subj`
+            if (record.item_subj) {
+                // Get the control in sub panel
+                var elem = document.getElementById('itemsTable_item_subj_' + uniqueIndex);
+                // Fill the comment values in the sub panel
+                elem.value = record.item_subj;
+            }
+        }
+    });
+
+    // Handle `Save` button click
+    $('#itemsSave').button().click(function () {
+        msg = $(document.forms[1]).serialize();
+        action_url = $('#items_form').attr("action");
+
+        $.ajax({
+            type: 'POST',
+            url: action_url,
+            data: msg,
+            success: function (data) {},
+            error: function (xhr, str) {}
+        });
+
+        $('#itemsModal').modal('hide');
+        return false;
+    });
+});
 </script>
 {% endblock %}
