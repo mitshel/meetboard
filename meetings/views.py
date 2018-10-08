@@ -35,7 +35,7 @@ def meet_update(request, meet_id=None):
     if request.method == 'POST':
         if request.POST:
             meet_type = request.POST.get('meetType')
-            meet_place = request.POST.get('meetPlace')
+            meet_place = request.POST.get('meetPlace','')
             meet_subj = request.POST.get('meetSubj')
             meet_lead = request.POST.get('meetLead')
             meet_date = request.POST.get('meetDate')

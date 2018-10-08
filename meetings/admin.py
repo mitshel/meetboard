@@ -1,5 +1,5 @@
 from django.contrib import admin
-from meetings.models import Meeting, Member, Dep, Studio, Item
+from meetings.models import Meeting, Member, Dep, Studio, Item, StudioList
 # Register your models here.
 
 
@@ -7,9 +7,13 @@ class MemberInline(admin.TabularInline):
     model = Member
     extra = 1
 
+class StudioInline(admin.TabularInline):
+    model = StudioList
+    extra = 1
+
 class Meeting_admin(admin.ModelAdmin):
     list_display = ('meet_type', 'meet_place', 'meet_subj', 'meet_lead', 'meet_date')
-    inlines = (MemberInline,)
+    inlines = (MemberInline, StudioInline)
 
 class Member_admin(admin.ModelAdmin):
     list_display = ('fio', 'dol', 'dep')

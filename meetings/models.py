@@ -30,7 +30,7 @@ class Meeting(models.Model):
     meet_tel = models.CharField(max_length=20, blank=True)
     meet_save = models.BooleanField(default=False)
     meet_confident = models.BooleanField(default=False)
-    studios = models.ManyToManyField('Studio')
+    studios = models.ManyToManyField('Studio', through='StudioList')
 
     def __str__(self):
          return  str(self.meet_date) +' | '+ self.meet_subj
@@ -61,7 +61,7 @@ class Studio(models.Model):
     studio_type = models.CharField(max_length=1, choices=STUDIO_TYPE_CHOICES, default=mVideo)
 
     def __str__(self):
-        return self.studio_addr
+        return self.dep.name+' / '+self.studio_addr+' / '+self.studio_type
 
 class StudioList(models.Model):
     meeting = models.ForeignKey('Meeting', db_index=True, null=True, on_delete=models.CASCADE)
