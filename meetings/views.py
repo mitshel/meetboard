@@ -14,10 +14,11 @@ from django.utils import timezone
 from docxtpl import DocxTemplate
 
 
-from meetings.models import MEETING_TYPE_CHOICES, Meeting, Dep, Member, Item, Studio, StudioList
+from meetings.models import MEETING_TYPE_CHOICES, Meeting, Dep, Member, Item, Studio, StudioList, mVideo
 
 def home(request):
     args={}
+    args['meetings'] = Meeting.objects.filter(meet_date__gte=timezone.now()).order_by('meet_date', '-meet_start')[0:3]
     return render(request,'mb_home.html', args)
 
 def meet_table(request):
@@ -40,26 +41,26 @@ def meet_update(request, meet_id=None):
     if request.method == 'POST':
         if request.POST:
             meet_type = request.POST.get('meetType')
-            meet_place = request.POST.get('meetPlace','')
+            #meet_place = request.POST.get('meetPlace','')
             meet_subj = request.POST.get('meetSubj')
-            meet_lead = request.POST.get('meetLead')
+            #meet_lead = request.POST.get('meetLead')
             meet_date = request.POST.get('meetDate')
             meet_date = datetime.datetime.strptime(meet_date, '%d.%m.%Y').date()
             meet_start = request.POST.get('meetStart')
             meet_end = request.POST.get('meetEnd')
-            meet_init = request.POST.get('meetInit')
+            #meet_init = request.POST.get('meetInit')
             meet_acc = request.POST.get('meetAcc')
             meet_tel = request.POST.get('meetTel')
             meet_save = (request.POST.get('meetSave','0') == '1')
             meet_confident = (request.POST.get('meetConfident') == '1')
 
             if meet_id:
-                Meeting.objects.filter(id=meet_id).update(meet_type=meet_type,meet_place=meet_place,meet_subj=meet_subj,meet_lead=meet_lead,
-                                       meet_date=meet_date, meet_start=meet_start, meet_end=meet_end, meet_init=meet_init,
+                Meeting.objects.filter(id=meet_id).update(meet_type=meet_type,meet_subj=meet_subj,
+                                       meet_date=meet_date, meet_start=meet_start, meet_end=meet_end,
                                        meet_acc=meet_acc, meet_tel=meet_tel, meet_save=meet_save, meet_confident=meet_confident)
             else:
-                Meeting.objects.create(meet_type=meet_type,meet_place=meet_place,meet_subj=meet_subj,meet_lead=meet_lead,
-                                       meet_date=meet_date, meet_start=meet_start, meet_end=meet_end, meet_init=meet_init,
+                Meeting.objects.create(meet_type=meet_type,meet_subj=meet_subj,
+                                       meet_date=meet_date, meet_start=meet_start, meet_end=meet_end,
                                        meet_acc=meet_acc, meet_tel=meet_tel, meet_save=meet_save, meet_confident=meet_confident)
 
             # args['meetings'] = Meeting.objects.all().order_by('-meet_date', '-meet_start')
@@ -117,12 +118,16 @@ def members_update(request):
                     fio = "{} {}{}{}{}".format(f,i[0:1],'.' if i!='' else '',o[0:1],'.' if o!='' else '')
                     dol = request.POST.get('membersTable_dol_{}'.format(ordern),'')
                     is_speaker = request.POST.get('membersTable_is_speaker_{}'.format(ordern),0)
+                    is_init = request.POST.get('membersTable_is_init_{}'.format(ordern),0)
+                    is_lead = request.POST.get('membersTable_is_lead_{}'.format(ordern),0)
 
                     if id:
-                        Member.objects.update(id=id, dep=dep, f=f, i=i, o=o, dol=dol, is_speaker=is_speaker, fio = fio,
+                        Member.objects.update(id=id, dep=dep, f=f, i=i, o=o, dol=dol, fio = fio,
+                                              is_speaker=is_speaker, is_lead=is_lead, is_init=is_init,
                                               meeting_id=meet_id, order_n=index)
                     else:
-                        id=Member.objects.create(dep=dep, f=f, i=i, o=o, dol=dol, is_speaker=is_speaker, fio=fio,
+                        id=Member.objects.create(dep=dep, f=f, i=i, o=o, dol=dol, fio = fio,
+                                              is_speaker=is_speaker, is_lead=is_lead, is_init=is_init,
                                               meeting_id=meet_id, order_n=index).id
                     id_list.append(id)
                     # print(id, dep, f, i, o, dol, is_speaker, fio,meet_id, index)
@@ -161,16 +166,17 @@ def members_doc(request, meet_id=None):
             ml.append({'f': m.f, 'i': m.i, 'o': m.o, 'fio': m.fio, 'dep': m.dep, 'dol': m.dol})
         deplist.append({'name': d, 'members': ml})
 
-        filename='meet{}_members_{}.docx'.format(meet_id,timezone.now)
+        filename='meet{}_members_{}.docx'.format(meet_id,timezone.now().strftime('%Y%m%d%H%M%S'))
+        fullname="media/{}".format(filename)
         doc = DocxTemplate("media/members_tpl.docx")
         context = {'meet_subj': meeting.meet_subj,
                    'meet_date':meeting.meet_date,
                    'deps':deplist}
 
         doc.render(context)
-        doc.save("media/{}".format(filename))
+        doc.save(fullname)
 
-        f = open("media/{}".format(filename), "rb")
+        f = open(fullname, "rb")
         s = f.read()
         response = HttpResponse()
         response["Content-Type"] = '{}; name="{}"'.format('application/msword', filename)
@@ -179,7 +185,7 @@ def members_doc(request, meet_id=None):
         response["Content-Length"] = str(len(s))
         response.write(s)
         f.close()
-        os.remove(filename)
+        os.remove(fullname)
 
         return response
 
@@ -233,6 +239,48 @@ def items_get(request, meet_id=None):
 
     return meet_table(request)
 
+def items_doc(request, meet_id=None):
+    try:
+        meeting = Meeting.objects.get(id=meet_id)
+    except:
+        meeting = None
+
+    if meeting:
+        items = Item.objects.filter(meeting__id=int(meet_id) if meet_id else 0).order_by('order_n')
+        studio = ''
+        try: studio = StudioList.objects.filter(meeting__id=int(meet_id)).order_by('order_n').values('studio__studio_addr')[0]['studio__studio_addr']
+        except: pass
+        try: meet_lead = Member.objects.filter(meeting__id=int(meet_id), is_lead=1)[0]
+        except: meet_lead = None
+        try: meet_init = Member.objects.filter(meeting__id=int(meet_id), is_init=1)[0]
+        except: meet_init = None
+
+        filename='meet{}_items_{}.docx'.format(meet_id,timezone.now().strftime('%Y%m%d%H%M%S'))
+        fullname="media/{}".format(filename)
+        doc = DocxTemplate("media/items_tpl.docx")
+        context = {'meeting': meeting,
+                   'items': items,
+                   'studio': studio,
+                   'meet_date': meeting.meet_date.strftime('%d.%m.%Y'),
+                   'meet_lead': meet_lead,
+                   'meet_init': meet_init}
+        doc.render(context)
+        doc.save(fullname)
+
+        f = open(fullname, "rb")
+        s = f.read()
+        response = HttpResponse()
+        response["Content-Type"] = '{}; name="{}"'.format('application/msword', filename)
+        response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
+        response["Content-Transfer-Encoding"] = 'binary'
+        response["Content-Length"] = str(len(s))
+        response.write(s)
+        f.close()
+        os.remove(fullname)
+
+        return response
+
+
 def studios_update(request):
     res = 1
     if request.method == 'POST':
@@ -282,3 +330,51 @@ def studios_get_bydep(request, dep_id=None):
         return HttpResponse(data,'json')
 
     return meet_table(request)
+
+def studios_doc(request, meet_id=None):
+    try:
+        meeting = Meeting.objects.get(id=meet_id)
+    except:
+        meeting = None
+
+    if meeting:
+        studios = StudioList.objects.filter(meeting__id=meet_id).order_by('order_n').values('id', 'meeting_id',
+                                                                                            'studio__dep_id',
+                                                                                            'studio__dep__name',
+                                                                                            'studio__studio_addr',
+                                                                                            'studio__studio_type',
+                                                                                            'studio_id',)
+        try: meet_lead = Member.objects.filter(meeting__id=int(meet_id), is_lead=1)[0]
+        except: meet_lead = None
+        try: meet_init = Member.objects.filter(meeting__id=int(meet_id), is_init=1)[0]
+        except: meet_init = None
+
+        filename='meet{}_req_{}.docx'.format(meet_id,timezone.now().strftime('%Y%m%d%H%M%S'))
+        fullname="media/{}".format(filename)
+        doc = DocxTemplate("media/req_tpl.docx")
+        context = {'meeting': meeting,
+                   'studios': studios,
+                   'meet_date': meeting.meet_date.strftime('%d.%m.%Y'),
+                   'meet_lead': meet_lead,
+                   'meet_init': meet_init,
+                   'Z0': '' if meeting.meet_save else 'X',
+                   'Z1': 'X' if meeting.meet_save else '',
+                   'K0': '' if meeting.meet_confident else 'X',
+                   'K1': 'X' if meeting.meet_confident else '',
+                   }
+
+        doc.render(context)
+        doc.save(fullname)
+
+        f = open(fullname, "rb")
+        s = f.read()
+        response = HttpResponse()
+        response["Content-Type"] = '{}; name="{}"'.format('application/msword', filename)
+        response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
+        response["Content-Transfer-Encoding"] = 'binary'
+        response["Content-Length"] = str(len(s))
+        response.write(s)
+        f.close()
+        os.remove(fullname)
+
+        return response

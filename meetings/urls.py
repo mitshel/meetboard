@@ -13,7 +13,9 @@ urlpatterns = [
     path('membersdoc/<str:meet_id>/', views.members_doc, name='membersdoc'),
     path('itemsupd/', views.items_update, name='itemsupd'),
     path('itemsget/<str:meet_id>/', views.items_get, name='itemsget'),
+    path('itemsdoc/<str:meet_id>/', views.items_doc, name='itemsdoc'),
     path('studiosupd/', views.studios_update, name='studiosupd'),
     path('studiosget/<str:meet_id>/', views.studios_get, name='studiosget'),
     path('studiosget_bydep/<str:dep_id>/', views.studios_get_bydep, name='studiosget_bydep'),
+    path('studiosdoc/<str:meet_id>/', views.studios_doc, name='studiosdoc'),
 ]

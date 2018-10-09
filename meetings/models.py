@@ -19,18 +19,22 @@ STUDIO_TYPE_CHOICES = (
 
 class Meeting(models.Model):
     meet_type = models.CharField(max_length=1, choices=MEETING_TYPE_CHOICES, default=mInternal)
-    meet_place = models.CharField(max_length=128,db_index=True)
+    #meet_place = models.CharField(max_length=128,db_index=True)
     meet_subj = models.CharField(max_length=128, db_index=True)
-    meet_lead = models.CharField(max_length=128, db_index=True, blank=True)
+    #meet_lead = models.CharField(max_length=128, db_index=True, blank=True)
     meet_date = models.DateField(null=False, default=timezone.now)
     meet_start = models.CharField(max_length=5,null=True)
     meet_end = models.CharField(max_length=5,null=True)
-    meet_init = models.CharField(max_length=64, db_index=True, blank=True)
+    #meet_init = models.CharField(max_length=64, db_index=True, blank=True)
     meet_acc = models.CharField(max_length=64, db_index=True, blank=True)
     meet_tel = models.CharField(max_length=20, blank=True)
     meet_save = models.BooleanField(default=False)
     meet_confident = models.BooleanField(default=False)
     studios = models.ManyToManyField('Studio', through='StudioList')
+
+    class Meta:
+        verbose_name = 'Совещание'
+        verbose_name_plural = 'Совещания'
 
     def __str__(self):
          return  str(self.meet_date) +' | '+ self.meet_subj
@@ -44,6 +48,8 @@ class Member(models.Model):
     fio = models.CharField(max_length=64, db_index=True)
     dol = models.CharField(max_length=128, db_index=True)
     is_speaker = models.IntegerField(default=0)
+    is_lead = models.IntegerField(default=0)
+    is_init = models.IntegerField(default=0)
     order_n = models.PositiveIntegerField(null=False, default=0)
 
     def __str__(self):
@@ -52,6 +58,10 @@ class Member(models.Model):
 class Dep(models.Model):
     name = models.CharField(max_length=64, db_index=True)
 
+    class Meta:
+        verbose_name = 'Организацию'
+        verbose_name_plural = 'Организации'
+
     def __str__(self):
         return self.name
 
@@ -59,6 +69,10 @@ class Studio(models.Model):
     dep = models.ForeignKey('Dep', db_index=True, null=True, on_delete=models.SET_NULL)
     studio_addr = models.CharField(max_length=256, db_index=True)
     studio_type = models.CharField(max_length=1, choices=STUDIO_TYPE_CHOICES, default=mVideo)
+
+    class Meta:
+        verbose_name = 'Студию'
+        verbose_name_plural = 'Студии'
 
     def __str__(self):
         return self.dep.name+' / '+self.studio_addr+' / '+self.studio_type
@@ -80,4 +94,4 @@ class Item(models.Model):
     order_n = models.PositiveIntegerField(null=False, default=0)
 
     def __str__(self):
-        return self.description
+        return self.item_subj+' / '+self.item_time

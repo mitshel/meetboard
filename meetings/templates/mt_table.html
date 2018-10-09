@@ -6,7 +6,7 @@
     <div class="row">
     <div class="col-sm-12">
         <div class="btn-group" role="group" aria-label="meetings menu">
-              <a type="button" class="btn btn-secondary" href="{% url 'meetings:add' %}"><i class="fa fa-plus"></i> Создать совещание </a>
+              <a type="button" class="btn btn-primary" href="{% url 'meetings:add' %}"><i class="fa fa-plus"></i> Создать совещание </a>
         </div>
     </div>
     </div>
@@ -154,15 +154,15 @@
           <td>{{ m.meet_start }}-{{ m.meet_end }}</td>
           <td>
                <a href="#" data-toggle="modal" data-target=".members-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Участники</a>
-               <a href="{% url 'meetings:membersdoc' m.id %}" target='_blank' data-toggle="tooltip" data-placement="top" title="Формировать список участников" onClick=""><i class="fa fa-print"></i></a>
+               <a href="{% url 'meetings:membersdoc' m.id %}" target='_blank' data-toggle="tooltip" data-placement="top" title="Формировать список участников" onClick=""><i class="fa fa-users"></i></a>
           </td>
           <td>
               <a href="#" data-toggle="modal" data-target=".items-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Повестка</a>
-              <a href="#" data-toggle="tooltip" data-placement="top" title="Формировать повестку" onClick=""><i class="fa fa-print"></i></a>
+              <a href="{% url 'meetings:itemsdoc' m.id %}" target='_blank' data-toggle="tooltip" data-placement="top" title="Формировать повестку" onClick=""><i class="fa fa-list"></i></a>
           </td>
           <td>
               <a href="#" data-toggle="modal" data-target=".studios-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Студии</a>
-              <a href="#" data-toggle="tooltip" data-placement="top" title="Формировать заявку" onClick=""><i class="fa fa-print"></i></a>
+              <a href="{% url 'meetings:studiosdoc' m.id %}" target='_blank' data-toggle="tooltip" data-placement="top" title="Формировать заявку" onClick=""><i class="fa fa-file"></i></a>
           </td>
         </tr>
       {% endfor %}
@@ -178,11 +178,8 @@
 ////////////////////////////////////////////////////////////////
 // meetTable Settings and Functions
 //
-$(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-});
-
 $(document).ready( function () {
+
     $('#meetTable').DataTable({
             "language": {
                           "processing": "Подождите...",
@@ -258,6 +255,8 @@ $(function () {
             { name: 'i', display: 'Имя', type: 'text', ctrlAttr: { maxlength: 32} },
             { name: 'o', display: 'Отчество', type: 'text', ctrlAttr: { maxlength: 32} },
             { name: 'dol', display: 'Должность', type: 'text', ctrlAttr: { maxlength: 64} },
+            { name: 'is_lead', display: 'Вед.', type: 'checkbox' , onChange: handle_lead},
+            { name: 'is_init', display: 'Иниц.', type: 'checkbox', onChange: handle_init},
             { name: 'is_speaker', display: 'Докл.', type: 'checkbox' },
             { name: 'Id', type: 'hidden', value: 0 },
         ],
@@ -291,6 +290,28 @@ $(function () {
         return false;
     });
 });
+
+function handle_lead(evt, rowIndex) {
+    var elem = evt.target;
+    if ($('#membersTable').appendGrid('getCtrlValue', 'is_lead', rowIndex)) {
+        var rowCount = $('#membersTable').appendGrid('getRowCount');
+        for (var i = 0; i < rowCount; i++) {
+            if (i != rowIndex)
+                $('#membersTable').appendGrid('setCtrlValue', 'is_lead', i, 0);
+        }
+    }
+}
+
+function handle_init(evt, rowIndex) {
+    var elem = evt.target;
+    if ($('#membersTable').appendGrid('getCtrlValue', 'is_init', rowIndex)) {
+        var rowCount = $('#membersTable').appendGrid('getRowCount');
+        for (var i = 0; i < rowCount; i++) {
+            if (i != rowIndex)
+                $('#membersTable').appendGrid('setCtrlValue', 'is_init', i, 0);
+        }
+    }
+}
 
 function selectEmployee(evtObj, uniqueIndex, rowData) {
     alert('Возможно тут будет реализован функционал выбора запомненных сотрудников!!!');
