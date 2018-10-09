@@ -154,7 +154,7 @@
           <td>{{ m.meet_start }}-{{ m.meet_end }}</td>
           <td>
                <a href="#" data-toggle="modal" data-target=".members-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Участники</a>
-               <a href="#" data-toggle="tooltip" data-placement="top" title="Формировать список участников" onClick=""><i class="fa fa-print"></i></a>
+               <a href="{% url 'meetings:membersdoc' m.id %}" target='_blank' data-toggle="tooltip" data-placement="top" title="Формировать список участников" onClick=""><i class="fa fa-print"></i></a>
           </td>
           <td>
               <a href="#" data-toggle="modal" data-target=".items-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Повестка</a>

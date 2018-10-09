@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 
 from django.template.context_processors import csrf
 from django.http import HttpResponse
@@ -7,6 +8,10 @@ from django.core import serializers
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.db.models import Count
+from django.contrib.staticfiles.views import serve
+from django.utils import timezone
+
+from docxtpl import DocxTemplate
 
 
 from meetings.models import MEETING_TYPE_CHOICES, Meeting, Dep, Member, Item, Studio, StudioList
@@ -137,6 +142,46 @@ def members_get(request, meet_id=None):
         return HttpResponse(data,'json')
 
     return meet_table(request)
+
+def members_doc(request, meet_id=None):
+    try:
+        meeting = Meeting.objects.get(id=meet_id)
+    except:
+        meeting = None
+
+    if meeting:
+        members = Member.objects.filter(meeting__id=int(meet_id) if meet_id else 0).order_by('order_n')
+
+        deplist = [];  d = None
+        for m in members:
+            if (m.dep != d):
+                if d: deplist.append({'name': d, 'members': ml})
+                d = m.dep
+                ml = []
+            ml.append({'f': m.f, 'i': m.i, 'o': m.o, 'fio': m.fio, 'dep': m.dep, 'dol': m.dol})
+        deplist.append({'name': d, 'members': ml})
+
+        filename='meet{}_members_{}.docx'.format(meet_id,timezone.now)
+        doc = DocxTemplate("media/members_tpl.docx")
+        context = {'meet_subj': meeting.meet_subj,
+                   'meet_date':meeting.meet_date,
+                   'deps':deplist}
+
+        doc.render(context)
+        doc.save("media/{}".format(filename))
+
+        f = open("media/{}".format(filename), "rb")
+        s = f.read()
+        response = HttpResponse()
+        response["Content-Type"] = '{}; name="{}"'.format('application/msword', filename)
+        response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
+        response["Content-Transfer-Encoding"] = 'binary'
+        response["Content-Length"] = str(len(s))
+        response.write(s)
+        f.close()
+        os.remove(filename)
+
+        return response
 
 def items_update(request):
     res = 1
