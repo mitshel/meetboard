@@ -378,6 +378,8 @@ def studios_doc(request, meet_id=None):
         except: meet_lead = None
         try: meet_init = Member.objects.filter(meeting__id=int(meet_id), is_init=1)[0]
         except: meet_init = None
+        try: studio = studios[0]
+        except: studio = None
 
         filename='meet{}_req_{}.docx'.format(meet_id,timezone.now().strftime('%Y%m%d%H%M%S'))
         fullname="media/{}".format(filename)
@@ -387,6 +389,7 @@ def studios_doc(request, meet_id=None):
                    'meet_date': meeting.meet_date.strftime('%d.%m.%Y'),
                    'meet_lead': meet_lead,
                    'meet_init': meet_init,
+                   'studio' : studio,
                    'Z0': '' if meeting.meet_save else 'X',
                    'Z1': 'X' if meeting.meet_save else '',
                    'K0': '' if meeting.meet_confident else 'X',
