@@ -135,6 +135,7 @@
           <th scope="col">Тема</th>
           <!--<th scope="col">Место</th>-->
           <th scope="col">Время</th>
+          <th scope="col">Ответственный</th>
           <th scope="col">Участники</th>
           <th scope="col">Повестка</th>
           <th scope="col">Студии</th>
@@ -149,18 +150,19 @@
           <a href="{% url 'meetings:copy' m.id %}" data-toggle="tooltip" data-placement="top" title="Скопировать"><i class="fa fa-copy"></i></a>
           </th>
           <td>{{ m.meet_date | date:"d.m.Y" }}</td>
-          <td>{{ m.meet_subj }}</td>
+          <td {% if m.meet_subj == '' %}class="table-warning"{% endif %}>{{ m.meet_subj }}</td>
           <!--<td>{{ m.meet_place }}</td>-->
-          <td>{{ m.meet_start }}-{{ m.meet_end }}</td>
-          <td>
+          <td {% if m.meet_start == '' %}class="table-warning"{% endif %}>{{ m.meet_start }}-{{ m.meet_end }}</td>
+          <td {% if m.meet_acc == '' %}class="table-warning"{% endif %}><span class='arrow' data-toggle="tooltip" data-placement="top" title="{{ m.meet_tel }}">{{ m.meet_acc }}</span></td>
+          <td {% if m.members_cnt == 0 %}class="table-warning"{% endif %}>
                <a href="#" data-toggle="modal" data-target=".members-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Участники</a>
                <a href="{% url 'meetings:membersdoc' m.id %}" target='_blank' data-toggle="tooltip" data-placement="top" title="Формировать список участников" onClick=""><i class="fa fa-users"></i></a>
           </td>
-          <td>
+          <td {% if m.items_cnt == 0 %}class="table-warning"{% endif %}>
               <a href="#" data-toggle="modal" data-target=".items-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Повестка</a>
               <a href="{% url 'meetings:itemsdoc' m.id %}" target='_blank' data-toggle="tooltip" data-placement="top" title="Формировать повестку" onClick=""><i class="fa fa-list"></i></a>
           </td>
-          <td>
+          <td {% if m.studios_cnt == 0 %}class="table-warning"{% endif %}>
               <a href="#" data-toggle="modal" data-target=".studios-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Студии</a>
               <a href="{% url 'meetings:studiosdoc' m.id %}" target='_blank' data-toggle="tooltip" data-placement="top" title="Формировать заявку" onClick=""><i class="fa fa-file"></i></a>
           </td>

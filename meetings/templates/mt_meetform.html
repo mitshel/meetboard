@@ -11,7 +11,7 @@
     {% csrf_token %}
 
     <div class="form-row">
-      <div class="form-group" col-md-3>
+      <div class="form-group col-md-3">
         <label for="meetType">Тип совещания</label>
         <select class="form-control form-control-sm" id="meetType" name ="meetType" aria-describedby="meet_type_Help">
             {% for mtc in meeting_type_choices %}
@@ -22,7 +22,8 @@
 
       <div class="form-group col-md-3">
             <label for="meetDate">Дата совещания:</label>
-            <input type="text" class="form-control form-control-sm" id="meetDate" name="meetDate" data-date-format="dd.mm.yyyy" data-provide="datepicker" value="{{ meet.meet_date | date:"d.m.Y" }}">
+            <input type="text" class="form-control form-control-sm" id="meetDate" name="meetDate" data-date-format="dd.mm.yyyy" data-provide="datepicker" value="{{ meet.meet_date | date:"d.m.Y" }}" required>
+            <div class="invalid-feedback">Пожалуйста, введите дату совещания.</div>
       </div>
       <div class="form-group col-md-3">
         <label for="meetStart">Начало:</label>
@@ -37,7 +38,8 @@
     <div class="form-row">
       <div class="form-group col-md-12">
         <label for="meetSubj">Тема совещания:</label>
-        <input type="text" class="form-control form-control-sm" id="meetSubj" name="meetSubj" placeholder="Введите тему планируемого совещания" value="{{ meet.meet_subj }}">
+        <input type="text" class="form-control form-control-sm" id="meetSubj" name="meetSubj" placeholder="Введите тему планируемого совещания" value="{{ meet.meet_subj }}" required>
+        <div class="invalid-feedback">Пожалуйста, введите тему совещания.</div>
       </div>
     </div>
 
@@ -103,7 +105,28 @@
 {% block js-block %}
     <script src="{% static "js/bootstrap-datepicker.min.js" %}"></script>
     <script src="{% static "js/bootstrap-datepicker.ru.min.js" %}"></script>
+    <script src="{% static "js/bootstrap-timepicker.min.js" %}"></script>
 <script type="text/javascript">
+
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function() {
+      'use strict';
+      window.addEventListener('load', function() {
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.getElementsByClassName('needs-validation');
+        // Loop over them and prevent submission
+        var validation = Array.prototype.filter.call(forms, function(form) {
+          form.addEventListener('submit', function(event) {
+            if (form.checkValidity() === false) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+          }, false);
+        });
+      }, false);
+    })();
+
     $('#meetDate').datepicker({
         weekStart: 1,
         daysOfWeekHighlighted: "6,0",
@@ -111,5 +134,26 @@
         todayHighlight: true,
         language: "ru",
     });
+    $('#meetStart').timepicker({
+                minuteStep: 1,
+                appendWidgetTo: 'body',
+                showSeconds: false,
+                showMeridian: false,
+                defaultTime: false,
+                icons: {    up: 'fa fa-chevron-up',
+                            down: 'fa fa-chevron-down'
+                },
+            });
+    $('#meetEnd').timepicker({
+                minuteStep: 1,
+                appendWidgetTo: 'body',
+                showSeconds: false,
+                showMeridian: false,
+                defaultTime: false,
+                icons: {    up: 'fa fa-chevron-up',
+                            down: 'fa fa-chevron-down'
+                },
+            });
+
 </script>
 {% endblock %}  {# js-block #}

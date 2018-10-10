@@ -24,8 +24,9 @@ def home(request):
 def meet_table(request):
     args={}
 
-    args['meetings'] = Meeting.objects.all().order_by('-meet_date','-meet_start')
+    args['meetings'] = Meeting.objects.all().annotate(members_cnt=Count('member'),items_cnt=Count('item'),studios_cnt=Count('studiolist')).order_by('-meet_date','-meet_start')
     args['deps'] = Dep.objects.all().annotate(studios_cnt=Count('studio')).order_by('name')
+
     return render(request,'mt_table.html', args)
 
 def meet_update(request, meet_id=None):
