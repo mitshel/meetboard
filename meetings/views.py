@@ -16,7 +16,7 @@ from django.conf import settings
 
 from docxtpl import DocxTemplate
 
-from meetings.models import MEETING_TYPE_CHOICES, Meeting, Dep, Member, Item, Studio, StudioList, mVideo
+from meetings.models import MEETING_TYPE_CHOICES, Meeting, Dep, Member, Item, Studio, StudioList, mVideo, Employee
 
 def mb_login(function=None, redirect_field_name=REDIRECT_FIELD_NAME, url=None):
     actual_decorator = user_passes_test(
@@ -42,6 +42,7 @@ def home(request):
 def meet_table(request):
     args={}
 
+    args['employees'] = Employee.objects.all().order_by('f','i','o','dol')
     args['meetings'] = Meeting.objects.all().annotate(members_cnt=Count('member'),items_cnt=Count('item'),studios_cnt=Count('studiolist')).order_by('-meet_date','-meet_start')
     args['deps'] = Dep.objects.all().annotate(studios_cnt=Count('studio')).order_by('name')
 

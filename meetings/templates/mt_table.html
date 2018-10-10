@@ -95,6 +95,57 @@
     </div>
 
     <!-- ------------------------------------------- -->
+    <!-- employeeSearchModal ------------------------------ -->
+    <!-- ------------------------------------------- -->
+    <div class="modal employee-modal-md" tabindex="-1" role="dialog" id="employeeModal" data-backdrop="static" data-keyboard="true">
+      <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+              <span class="modal-title">Сотрудники</span>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+          <div class="modal-body">
+                 <label for="inputEmployee">Введите фамилию для поиска сотрудника:</label>
+                 <input class="typeahead form-control" type="text" data-provide="typeahead" data-items="8" id="inputEmployee">
+                 <br>
+                 <div class="row">
+                     <div class="col-4">
+                         <label for="employeeF">Фамилия:</label>
+                         <input type="text" class="form-control form-control-sm" id="employeeF" name="employeeF" readonly>
+                     </div>
+                     <div class="col-4">
+                         <label for="employeeI">Имя:</label>
+                         <input type="text" class="form-control form-control-sm" id="employeeI" name="employeeI" readonly>
+                     </div>
+                     <div class="col-4">
+                         <label for="employeeO">Отчество:</label>
+                         <input type="text" class="form-control form-control-sm" id="employeeO" name="employeeO" readonly>
+                     </div>
+                     <div class="col-12">
+                         <label for="employeeDol">Должность:</label>
+                         <input type="text" class="form-control form-control-sm" id="employeeDol" name="employeeDol" readonly>
+                     </div>
+                     <div class="col-12">
+                         <label for="employeeDep">Организация:</label>
+                         <input type="text" class="form-control form-control-sm" id="employeeDep" name="employeeDep" readonly>
+                     </div>
+                 </div>
+                 <input type="hidden" id="employeeRowIndex" name="employeeRowIndex">
+                 <input type="hidden" id="employeeId" name="employeeId">
+                 <input type="hidden" id="employeeTable" name="employeeTable">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal" id="employeeSelect">Выбрать</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------- -->
     <!-- studiosModal ------------------------------ -->
     <!-- ------------------------------------------- -->
     <div class="modal studios-modal-lg" tabindex="-1" role="dialog" id="studiosModal" data-backdrop="static" data-keyboard="false">
@@ -261,10 +312,11 @@ $(function () {
             { name: 'is_init', display: 'Иниц.', type: 'checkbox', onChange: handle_init},
             { name: 'is_speaker', display: 'Докл.', type: 'checkbox' },
             { name: 'Id', type: 'hidden', value: 0 },
+            { name: 'eId', type: 'hidden', value: 0 },
         ],
-        //customRowButtons: [
-        //      { uiButton: { icon: 'ui-icon-person', showLabel: false }, click: selectEmployee, btnCss: { 'min-width': '30px' }, btnAttr: { title: 'Выбрать сотрудника' }, atTheFront: true },
-        //],
+        customRowButtons: [
+              { uiButton: { icon: 'ui-icon-person', showLabel: false }, click: selectEmployee, btnCss: { 'min-width': '30px' }, btnAttr: { title: 'Выбрать сотрудника' }, atTheFront: true },
+        ],
         i18n: {
             append: 'Добавить запись',
             removeLast: 'Удалить последнюю запись',
@@ -313,15 +365,6 @@ function handle_init(evt, rowIndex) {
                 $('#membersTable').appendGrid('setCtrlValue', 'is_init', i, 0);
         }
     }
-}
-
-function selectEmployee(evtObj, uniqueIndex, rowData) {
-    alert('Возможно тут будет реализован функционал выбора запомненных сотрудников!!!');
-    // Check the caller button exist in event object
-    //if (evtObj && evtObj.target) {
-        // Do something on the button, such as disable the button
-    //    $(evtObj.target).button('disable');
-    //}
 }
 
 ////////////////////////////////////////////////////////////////
@@ -374,10 +417,11 @@ $(function () {
             { name: 'dol', display: 'Должность', type: 'text', ctrlAttr: { maxlength: 64} },
             { name: 'item_time', display: 'Время', type: 'text', ctrlAttr: { maxlength: 32} },
             { name: 'Id', type: 'hidden', value: 0 },
+            { name: 'eId', type: 'hidden', value: 0 },
         ],
-        //customRowButtons: [
-        //      { uiButton: { icon: 'ui-icon-person', showLabel: false }, click: selectEmployee, btnCss: { 'min-width': '30px' }, btnAttr: { title: 'Выбрать сотрудника' }, atTheFront: true },
-        //],
+        customRowButtons: [
+              { uiButton: { icon: 'ui-icon-person', showLabel: false }, click: selectEmployee, btnCss: { 'min-width': '30px' }, btnAttr: { title: 'Выбрать сотрудника' }, atTheFront: true },
+        ],
         i18n: {
             append: 'Добавить запись',
             removeLast: 'Удалить последнюю запись',
@@ -428,6 +472,67 @@ $(function () {
         $('#itemsModal').modal('hide');
         return false;
     });
+});
+
+var $inputEmployee = $("#inputEmployee");
+
+function selectEmployee(evtObj, uniqueIndex, rowData) {
+    $inputEmployee.val(rowData.f);
+    $("#employeeF").val("")
+    $("#employeeI").val("")
+    $("#employeeO").val("")
+    $("#employeeDol").val("")
+    $("#employeeDep").val("")
+    $("#employeeId").val(0)
+    // Вычисляем и запоминаем из какой таблицы был вызов #membersTable или #itemsTable
+    $("#employeeTable").val(evtObj.data.tbWhole.id)
+    $("#employeeRowIndex").val(uniqueIndex)
+    $('#employeeModal').modal('show');
+    // Check the caller button exist in event object
+    //if (evtObj && evtObj.target) {
+        // Do something on the button, such as disable the button
+    //    $(evtObj.target).button('disable');
+    //}
+}
+
+$('#employeeSelect').button().click(function () {
+    var idx = $("#employeeRowIndex").val()-1;
+    var tbl ='#'+$("#employeeTable").val()
+    $(tbl).appendGrid('setCtrlValue', 'f', idx, $("#employeeF").val());
+    $(tbl).appendGrid('setCtrlValue', 'i', idx, $("#employeeI").val());
+    $(tbl).appendGrid('setCtrlValue', 'o', idx, $("#employeeO").val());
+    $(tbl).appendGrid('setCtrlValue', 'dep', idx, $("#employeeDep").val());
+    $(tbl).appendGrid('setCtrlValue', 'dol', idx, $("#employeeDol").val());
+    $(tbl).appendGrid('setCtrlValue', 'eId', idx, $("#employeeId").val());
+});
+
+$inputEmployee.typeahead({
+  source: [
+          {% for e in employees %}{name:"{{ e.f }} {{ e.i }} {{ e.o }}",id:"{{ e.id }}", f:"{{ e.f }}", i:"{{ e.i }}", o:"{{ e.o }}", dol:"{{ e.dol }}", dep:"{{ e.dep }}"}{% if not forloop.last %},{% endif %}{% endfor %}
+  ],
+  autoSelect: true
+});
+
+$inputEmployee.change(function() {
+  var current = $inputEmployee.typeahead("getActive");
+  if (current) {
+    // Some item from your model is active!
+    $("#employeeF").val(current.f)
+    $("#employeeI").val(current.i)
+    $("#employeeO").val(current.o)
+    $("#employeeId").val(current.id)
+    $("#employeeDol").val(current.dol.replace(/&quot;/g,'"'))
+    $("#employeeDep").val(current.dep.replace(/&quot;/g,'"'))
+    if (current.name == $inputEmployee.val()) {
+      // This means the exact match is found. Use toLowerCase() if you want case insensitive match.
+    } else {
+      // This means it is only a partial match, you can either add a new item
+      // or take the active if you don't want new items
+        // Выбор осещетсвлен из выпадающего списка по части строки
+    }
+  } else {
+    // Nothing is active so it is a new value (or maybe empty value)
+  }
 });
 
 ////////////////////////////////////////////////////////////////

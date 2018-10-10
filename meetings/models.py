@@ -55,8 +55,24 @@ class Member(models.Model):
     def __str__(self):
          return  self.fio
 
+class Employee(models.Model):
+    dep = models.ForeignKey('Dep', db_index=True, null=True, on_delete=models.SET_NULL, verbose_name='Организация')
+    f = models.CharField(max_length=32,db_index=True, verbose_name='Фамилия')
+    i = models.CharField(max_length=32, db_index=True, verbose_name='Имя')
+    o = models.CharField(max_length=32, db_index=True, blank=True, verbose_name='Отчество')
+    dol = models.CharField(max_length=128, db_index=True, verbose_name='Должность')
+    email = models.EmailField(verbose_name='E-Mail', blank=True)
+    tel = models.CharField(max_length=16, verbose_name='Телефон', blank=True)
+
+    def __str__(self):
+         return  self.f+' '+self.i+' '+self.o+' '
+
+    class Meta:
+        verbose_name = 'Сотрудник'
+        verbose_name_plural = 'Сотрудники'
+
 class Dep(models.Model):
-    name = models.CharField(max_length=64, db_index=True)
+    name = models.CharField(max_length=64, db_index=True, verbose_name='Организация')
 
     class Meta:
         verbose_name = 'Организацию'
@@ -66,9 +82,9 @@ class Dep(models.Model):
         return self.name
 
 class Studio(models.Model):
-    dep = models.ForeignKey('Dep', db_index=True, null=True, on_delete=models.SET_NULL)
-    studio_addr = models.CharField(max_length=256, db_index=True)
-    studio_type = models.CharField(max_length=1, choices=STUDIO_TYPE_CHOICES, default=mVideo)
+    dep = models.ForeignKey('Dep', db_index=True, null=True, on_delete=models.SET_NULL, verbose_name='Организация')
+    studio_addr = models.CharField(max_length=256, db_index=True, verbose_name='Адрес студии')
+    studio_type = models.CharField(max_length=1, choices=STUDIO_TYPE_CHOICES, default=mVideo, verbose_name='Тип студии')
 
     class Meta:
         verbose_name = 'Студию'
