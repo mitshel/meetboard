@@ -25,21 +25,46 @@
     <div class="row">
     <div class="col-sm-12">
     <nav class="navbar navbar-expand-md navbar-dark fixed-top" style="background-color: #0a76bf;">
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarLeft" aria-controls="navbarLeft" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <a class="navbar-brand" href="{% url 'home' %}"><b>ПАО Газпром</b></a>
 
-      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+      <div class="collapse navbar-collapse" id="navbarLeft">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
             <a class="nav-link" href="{% url 'meetings:table' %}">Совещания <span class="sr-only">(current)</span></a>
           </li>
         </ul>
+
+        <ul class="navbar-nav mr-left">
+          {% if mb_auth %}
+              <li class="nav-item active">
+            {% if user.is_authenticated %}
+                <a class="nav-link" href="{% url "logout" %}"><i class="fa fa-torsos"></i>Выход ({{ user.username }})</a>
+            {% else %}
+                <a class="nav-link" href="{% url "login" %}"><i class="fa fa-torsos"></i>Вход</a>
+            {% endif %}
+              </li>
+          {% endif %}
+
+          {% if user.is_superuser %}
+              <li class="nav-item active">
+                <a class="nav-link" href="{% url 'admin:index' %}"><i class="fa fa-cogs"></i></a>
+              </li>
+          {% endif %}
+         </ul>
       </div>
-      <a class="nav-link" href="{% url 'admin:index' %}"><i class="fa fa-cogs"></i></a>
     </nav>
 
+    {% if system_message %}
+    <div class="alert {{ system_message.type }} alert-dismissible fade show" role="alert">
+      <span>{{ system_message.text }}</span>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    {% endif %}
 
     {% block content %}
 

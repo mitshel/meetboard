@@ -23,6 +23,8 @@ from meetings import views
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('login/', views.loginView, name='login'),
+    path('logout/', views.logoutView, name='logout'),
     path('meet/', include(('meetings.urls', 'meetings'), namespace='meetings')),
     path('admin/', admin.site.urls, name='admin'),
 ]

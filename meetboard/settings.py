@@ -64,6 +64,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'meetings.views.mb_processor',
             ],
         },
     },
@@ -128,3 +129,6 @@ STATICFILES_DIRS = [
 MEDIA_ROOT = BASE_DIR + '/media/'
 MEDIA_URL = '/media/'
 ADMIN_MEDIA_PREFIX = '/media/'
+
+
+MB_AUTH = True

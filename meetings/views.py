@@ -10,17 +10,35 @@ from django.urls import reverse, reverse_lazy
 from django.db.models import Count
 from django.contrib.staticfiles.views import serve
 from django.utils import timezone
+from django.contrib.auth import authenticate, login, logout, REDIRECT_FIELD_NAME
+from django.contrib.auth.decorators import user_passes_test
+from django.conf import settings
 
 from docxtpl import DocxTemplate
 
-
 from meetings.models import MEETING_TYPE_CHOICES, Meeting, Dep, Member, Item, Studio, StudioList, mVideo
+
+def mb_login(function=None, redirect_field_name=REDIRECT_FIELD_NAME, url=None):
+    actual_decorator = user_passes_test(
+        lambda u: (u.is_authenticated if settings.MB_AUTH else True),
+        login_url=reverse_lazy(url),
+        redirect_field_name=redirect_field_name
+    )
+    if function:
+        return actual_decorator(function)
+    return actual_decorator
+
+def mb_processor(request):
+    args={}
+    args['mb_auth']=settings.MB_AUTH
+    return args
 
 def home(request):
     args={}
     args['meetings'] = Meeting.objects.filter(meet_date__gte=timezone.now()).order_by('meet_date', '-meet_start')[0:3]
     return render(request,'mb_home.html', args)
 
+@mb_login(url='login')
 def meet_table(request):
     args={}
 
@@ -29,6 +47,7 @@ def meet_table(request):
 
     return render(request,'mt_table.html', args)
 
+@mb_login(url='login')
 def meet_update(request, meet_id=None):
     args={}
     args.update(csrf(request))
@@ -81,6 +100,7 @@ def meet_update(request, meet_id=None):
 
     return render(request,'mt_meetform.html', args)
 
+@mb_login(url='login')
 def meet_delete(request, meet_id=None):
     Meeting.objects.filter(id=meet_id).delete()
     return redirect(reverse("meetings:table"))
@@ -100,6 +120,7 @@ def meet_copy(request, meet_id=None):
 
     return render(request,'mt_meetform.html', args)
 
+@mb_login(url='login')
 def members_update(request):
     res = 1
     if request.method == 'POST':
@@ -140,6 +161,7 @@ def members_update(request):
     response.write(json.dumps({'user':'admin','id':1,'result':res}))
     return response
 
+@mb_login(url='login')
 def members_get(request, meet_id=None):
     if request.is_ajax():
         members = Member.objects.filter(meeting__id=int(meet_id) if meet_id else 0).values()
@@ -149,6 +171,7 @@ def members_get(request, meet_id=None):
 
     return meet_table(request)
 
+@mb_login(url='login')
 def members_doc(request, meet_id=None):
     try:
         meeting = Meeting.objects.get(id=meet_id)
@@ -190,6 +213,7 @@ def members_doc(request, meet_id=None):
 
         return response
 
+@mb_login(url='login')
 def items_update(request):
     res = 1
     if request.method == 'POST':
@@ -226,6 +250,7 @@ def items_update(request):
     response.write(json.dumps({'user':'admin','id':1,'result':res}))
     return response
 
+@mb_login(url='login')
 def items_get(request, meet_id=None):
     if request.is_ajax():
         meet_id = int(meet_id) if meet_id else 0
@@ -240,6 +265,7 @@ def items_get(request, meet_id=None):
 
     return meet_table(request)
 
+@mb_login(url='login')
 def items_doc(request, meet_id=None):
     try:
         meeting = Meeting.objects.get(id=meet_id)
@@ -281,7 +307,7 @@ def items_doc(request, meet_id=None):
 
         return response
 
-
+@mb_login(url='login')
 def studios_update(request):
     res = 1
     if request.method == 'POST':
@@ -310,6 +336,7 @@ def studios_update(request):
     response.write(json.dumps({'user':'admin','id':1,'result':res}))
     return response
 
+@mb_login(url='login')
 def studios_get(request, meet_id=None):
     if request.is_ajax():
         meet_id = int(meet_id) if meet_id else 0
@@ -321,6 +348,7 @@ def studios_get(request, meet_id=None):
 
     return meet_table(request)
 
+@mb_login(url='login')
 def studios_get_bydep(request, dep_id=None):
     if request.is_ajax():
         dep_id = int(dep_id) if dep_id else 0
@@ -332,6 +360,7 @@ def studios_get_bydep(request, dep_id=None):
 
     return meet_table(request)
 
+@mb_login(url='login')
 def studios_doc(request, meet_id=None):
     try:
         meeting = Meeting.objects.get(id=meet_id)
@@ -379,3 +408,42 @@ def studios_doc(request, meet_id=None):
         os.remove(fullname)
 
         return response
+
+def loginView(request):
+    args = {}
+    args.update(csrf(request))
+    try:
+        username = request.POST['username']
+        password = request.POST['password']
+    except KeyError:
+        return render(request, 'mb_login.html', args)
+
+    next_url = request.GET.get('next', reverse("home"))
+
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        if user.is_active:
+            login(request, user)
+            return redirect(next_url)
+        else:
+            args['system_message'] = {'text': 'Ваш аккаунт не активирван!', 'type': 'alert-danger'}
+            return handler403(request, args)
+            # return render(request, 'sopds_login.html', args)
+    else:
+        args['system_message'] = {'text': 'Пользователь не существует, либо пароль неверен!', 'type': 'alert-danger'}
+        return handler403(request, args)
+        # return render(request, 'sopds_login.html', args)
+
+    return handler403(request, args)
+    # return render(request, 'sopds_login.html', args)
+
+@mb_login(url='login')
+def logoutView(request):
+    logout(request)
+    args = {}
+    return redirect(reverse('home'))
+
+def handler403(request, args):
+    response = render(request, 'mb_login.html', args)
+    response.status_code = 403
+    return response
