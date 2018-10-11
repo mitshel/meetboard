@@ -72,7 +72,7 @@
 -->
       <div class="form-group col-md-4">
         <label for="meetAcc">Ответственный за подготовку:</label>
-        <input type="text" class="form-control form-control-sm" id="meetAcc" name="meetAcc" placeholder="Сидоров А.В." value="{{ meet.meet_acc }}">
+        <input type="text" class="typeahead form-control form-control-sm" id="meetAcc" name="meetAcc" data-provide="typeahead" data-items="8" placeholder="Сидоров А.В." value="{{ meet.meet_acc }}">
       </div>
       <div class="form-group col-md-4">
         <label for="meetTel">Контактный телефон:</label>
@@ -155,5 +155,32 @@
                 },
             });
 
+
+var $inputEmployee = $("#meetAcc");
+
+$inputEmployee.typeahead({
+  source: [
+          {% for e in employees %}{name:"{{ e.f }} {{ e.i }} {{ e.o }}",id:"{{ e.id }}", f:"{{ e.f }}", i:"{{ e.i }}", o:"{{ e.o }}", tel:"{{ e.tel }}"}{% if not forloop.last %},{% endif %}{% endfor %}
+  ],
+  autoSelect: true
+});
+
+$inputEmployee.change(function() {
+  var current = $inputEmployee.typeahead("getActive");
+  if (current) {
+    // Some item from your model is active!
+    $("#meetAcc").val(current.f+' '+current.i.substr(0,1)+'.'+current.o.substr(0,1)+'.');
+    $("#meetTel").val(current.tel);
+    if (current.name == $inputEmployee.val()) {
+      // This means the exact match is found. Use toLowerCase() if you want case insensitive match.
+    } else {
+      // This means it is only a partial match, you can either add a new item
+      // or take the active if you don't want new items
+        // Выбор осещетсвлен из выпадающего списка по части строки
+    }
+  } else {
+    // Nothing is active so it is a new value (or maybe empty value)
+  }
+});
 </script>
 {% endblock %}  {# js-block #}

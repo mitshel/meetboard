@@ -19,13 +19,10 @@ STUDIO_TYPE_CHOICES = (
 
 class Meeting(models.Model):
     meet_type = models.CharField(max_length=1, choices=MEETING_TYPE_CHOICES, default=mInternal)
-    #meet_place = models.CharField(max_length=128,db_index=True)
     meet_subj = models.CharField(max_length=128, db_index=True)
-    #meet_lead = models.CharField(max_length=128, db_index=True, blank=True)
     meet_date = models.DateField(null=False, default=timezone.now)
     meet_start = models.CharField(max_length=5,null=True)
     meet_end = models.CharField(max_length=5,null=True)
-    #meet_init = models.CharField(max_length=64, db_index=True, blank=True)
     meet_acc = models.CharField(max_length=64, db_index=True, blank=True)
     meet_tel = models.CharField(max_length=20, blank=True)
     meet_save = models.BooleanField(default=False)
@@ -111,3 +108,23 @@ class Item(models.Model):
 
     def __str__(self):
         return self.item_subj+' / '+self.item_time
+
+
+class Check(models.Model):
+    meeting = models.ForeignKey('Meeting', db_index=True, null=True, on_delete=models.CASCADE)
+    p1_4 = models.IntegerField(default=0)
+    p2_4 = models.IntegerField(default=0)
+    p3_4 = models.IntegerField(default=0)
+    p4_4 = models.IntegerField(default=0)
+    p5_1 = models.IntegerField(default=0)
+    p5_2 = models.IntegerField(default=0)
+    p5_3 = models.IntegerField(default=0)
+    p5_4 = models.IntegerField(default=0)
+    p6_2 = models.IntegerField(default=0)
+    p6_4 = models.IntegerField(default=0)
+    p7_4 = models.IntegerField(default=0)
+    p8_4 = models.IntegerField(default=0)
+    p9_1 = models.IntegerField(default=0)
+    p9_4 = models.IntegerField(default=0)
+    p10_4 = models.IntegerField(default=0)
+    p11_4 = models.IntegerField(default=0)

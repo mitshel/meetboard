@@ -18,4 +18,6 @@ urlpatterns = [
     path('studiosget/<str:meet_id>/', views.studios_get, name='studiosget'),
     path('studiosget_bydep/<str:dep_id>/', views.studios_get_bydep, name='studiosget_bydep'),
     path('studiosdoc/<str:meet_id>/', views.studios_doc, name='studiosdoc'),
+    path('plandoc/', views.plan_doc, name='plandoc'),
+    path('checksupd/', views.checks_update, name='checksupd'),
 ]

@@ -7,6 +7,7 @@
     <div class="col-sm-12">
         <div class="btn-group" role="group" aria-label="meetings menu">
               <a type="button" class="btn btn-primary" href="{% url 'meetings:add' %}"><i class="fa fa-plus"></i> Создать совещание </a>
+              <a type="button" class="btn btn-primary" href="{% url 'meetings:plandoc' %}"><i class="fa fa-list"></i> Шаблон плана подготовки </a>
         </div>
     </div>
     </div>
@@ -174,6 +175,215 @@
       </div>
     </div>
 
+    <!-- ------------------------------------------- -->
+    <!-- checksModal  ------------------------------ -->
+    <!-- ------------------------------------------- -->
+    <div class="modal checks-modal-lg" tabindex="-1" role="dialog" id="checksModal" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+              <span class="modal-title">Контроль подготовки совещания</span>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+          <div class="modal-body mx-auto">
+              <form action="{% url 'meetings:checksupd' %}" method="post" id="checks_form">
+              {% csrf_token %}
+                    <table class="table table-sm table-hover table-bordered" id="checkTable" style="font-size: 0.9rem;">
+                      <thead>
+                        <tr>
+                          <th scope="col">п/п</th>
+                          <th scope="col">Видео</th>
+                          <th scope="col">Селектор</th>
+                          <th scope="col">Очное</th>
+                          <th scope="col">Загружено в САД</th>
+                          <th scope="col">Отправлено по @</th>
+                          <th scope="col">Отправлено экспед.</th>
+                          <th scope="col">Выполнено</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <th scope="row">1.</th>
+                          <td colspan="3">Определить дату, время, тему совещания (Спросить у инициатора совещания)</td>
+                          <td id="tdp1_1" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp1_2" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp1_3" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp1_4" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p1_4" name="p1_4">
+                              </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th scope="row">2.</th>
+                          <td colspan="3">Составить список участников (Спросить у инициатора совещания)</td>
+                          <td id="tdp2_1" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp2_2" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp2_3" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp2_4" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p2_4" name="p2_4">
+                              </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th scope="row">3.</th>
+                          <td colspan="3">Составить повестку совещания (Спросить у инициатора совещания)</td>
+                          <td id="tdp3_1" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp3_2" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp3_3" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp3_4" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p3_4" name="p3_4">
+                              </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th scope="row">4.</th>
+                          <td colspan="3">Позвонить всем участникам, выяснить все ньюансы их участия</td>
+                          <td id="tdp4_1" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp4_2" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp4_3" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp4_4" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p4_4" name="p4_4">
+                              </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th scope="row">5.</th>
+                          <td colspan="3">Написать всем письмо, об участии в совещании</td>
+                          <td id="tdp5_1" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p5_1" name="p5_1">
+                              </div>
+                          </td>
+                          <td id="tdp5_2" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p5_2" name="p5_2">
+                              </div>
+                          </td>
+                            <td id="tdp5_3" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p5_3" name="p5_3">
+                              </div>
+                          </td>
+                          <td id="tdp5_4" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p5_4" name="p5_4">
+                              </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th scope="row">6.</th>
+                          <td colspan="3">Разослать список участников и повестку совещания всем участникам</td>
+                          <td id="tdp6_1" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp6_2" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p6_2" name="p6_2">
+                              </div>
+                          </td>
+                          <td id="tdp6_3" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp6_4" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p6_4" name="p6_4">
+                              </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th scope="row">7.</th>
+                          <td>Зарезервировать студию</td>
+                          <td style="text-align: center;"><b>X</b></td>
+                          <td style="text-align: center;"><b>X</b></td>
+                          <td id="tdp7_1" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp7_2" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp7_3" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp7_4" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p7_4" name="p7_4">
+                              </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th scope="row">8.</th>
+                          <td>Узнать адреса студий участников</td>
+                          <td style="text-align: center;"><b>X</b></td>
+                          <td style="text-align: center;"><b>X</b></td>
+                          <td id="tdp8_1" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp8_2" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp8_3" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp8_4" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p8_4" name="p8_4">
+                              </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th scope="row">9.</th>
+                          <td>Отправить служебку о подключении ВКС</td>
+                          <td style="text-align: center;"><b>X</b></td>
+                          <td style="text-align: center;"><b>X</b></td>
+                          <td id="tdp9_1" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p9_1" name="p9_1">
+                              </div>
+                          </td>
+                          <td id="tdp9_2" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp9_3" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp9_4" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p9_4" name="p9_4">
+                              </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th scope="row">10.</th>
+                          <td>Позвонить по номеру 9-10-10, сказать номер служебки</td>
+                          <td>Позвонить по номеру 9-10-10, сообщить номера телефонов участников</td>
+                          <td>Уточнить всех прибывших на совещание</td>
+                          <td id="tdp10_1" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp10_2" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp10_3" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp10_4" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p10_4" name="p10_4">
+                              </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th scope="row">11.</th>
+                          <td style="text-align: center;"><b>X</b></td>
+                          <td style="text-align: center;"><b>X</b></td>
+                          <td style="text-align: center;">Обеспечить всех участников материалами к совещанию</td>
+                          <td id="tdp11_1" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p9_1" name="p9_1">
+                              </div>
+                          </td>
+                          <td id="tdp11_2" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp11_3" style="text-align: center;"><b>X</b></td>
+                          <td id="tdp11_4" style="text-align: center;">
+                              <div class="form-group form-check">
+                                <input type="checkbox" class="form-check-input" id="p11_4" name="p11_4">
+                              </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+              <input type="hidden" name="meet_id" value="0" id="checks_meet_id"/>
+              <br>
+              </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal" id="checksSave">Сохранить</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- ------------------------------------------- -->
     <!-- meetTable          ------------------------ -->
@@ -196,9 +406,10 @@
       {% for m in meetings %}
         <tr>
           <th scope="row">
-          <a href="#" data-toggle="tooltip" data-placement="top" title="Удалить совещание" onClick="$('#meetingDeleteButton').attr('href','{% url 'meetings:delete' m.id %}');$('#meetingDeleteModal').find('div.modal-body').find('span').text('{{ m.meet_subj }}');$('#meetingDeleteModal').modal('show');"><i class="fa fa-trash"></i></a>
-          <a href="{% url 'meetings:update' m.id %}" data-toggle="tooltip" data-placement="top" title="Изменить данные"><i class="fa fa-edit"></i></a>
-          <a href="{% url 'meetings:copy' m.id %}" data-toggle="tooltip" data-placement="top" title="Скопировать"><i class="fa fa-copy"></i></a>
+              <a href="#" data-toggle="tooltip" data-placement="top" title="Удалить совещание" onClick="$('#meetingDeleteButton').attr('href','{% url 'meetings:delete' m.id %}');$('#meetingDeleteModal').find('div.modal-body').find('span').text('{{ m.meet_subj }}');$('#meetingDeleteModal').modal('show');"><i class="fa fa-trash"></i></a>
+              <a href="{% url 'meetings:update' m.id %}" data-toggle="tooltip" data-placement="top" title="Изменить данные"><i class="fa fa-edit"></i></a>
+              <a href="{% url 'meetings:copy' m.id %}" data-toggle="tooltip" data-placement="top" title="Скопировать"><i class="fa fa-copy"></i></a>
+              <a href="#" data-toggle="tooltip" data-placement="top" title="Контроль" onClick="showCheckWindow({{ m.id }});"><i class="fa fa-check-square"></i></a>
           </th>
           <td>{{ m.meet_date | date:"d.m.Y" }}</td>
           <td {% if m.meet_subj == '' %}class="table-warning"{% endif %}>{{ m.meet_subj }}</td>
@@ -666,5 +877,31 @@ $(function () {
         return false;
     });
 });
+
+
+////////////////////////////////////////////////////////////////
+// checkModal Settings and Functions
+//
+
+function showCheckWindow(meet_id) {
+    $('#checksModal').modal('show');
+};
+
+// Handle `Save` button click
+$('#checksSave').button().click(function () {
+    msg = $(document.forms[2]).serialize();
+    action_url = $('#checks_form').attr("action");
+    $.ajax({
+        type: 'POST',
+        url: action_url,
+        data: msg,
+        success: function (data) {},
+        error: function (xhr, str) {}
+    });
+
+    $('#checksModal').modal('hide');
+    return false;
+});
+
 </script>
 {% endblock %}

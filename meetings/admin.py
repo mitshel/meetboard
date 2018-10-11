@@ -24,7 +24,7 @@ class Member_admin(admin.ModelAdmin):
     # inlines = (Meeting_MemberInline,)
 
 class Employee_admin(admin.ModelAdmin):
-    list_display = ('f', 'i','o','dol', 'dep')
+    list_display = ('f', 'i','o','dol', 'dep', 'email', 'tel')
     # inlines = (Meeting_MemberInline,)
 
 class Dep_admin(admin.ModelAdmin):
@@ -35,7 +35,7 @@ class Studio_admin(admin.ModelAdmin):
     list_display = ('dep', 'studio_addr', 'studio_type')
 
 class Item_admin(admin.ModelAdmin):
-    list_display = ('item_subj', 'item_time', 'dep', 'f', 'i', 'o', 'dol', 'email', 'tel')
+    list_display = ('item_subj', 'item_time', 'dep', 'f', 'i', 'o', 'dol')
 
 
 admin.site.register(Meeting, Meeting_admin)

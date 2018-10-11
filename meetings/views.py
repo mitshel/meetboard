@@ -95,6 +95,7 @@ def meet_update(request, meet_id=None):
         except Meeting.DoesNotExist:
             meet = None
 
+    args['employees'] = Employee.objects.all().order_by('f', 'i', 'o').values('f', 'i', 'o','tel')
     args['meet']=meet
     args['meet_id'] = meet_id if meet_id else 0
     args['meeting_type_choices'] = MEETING_TYPE_CHOICES
@@ -338,6 +339,19 @@ def studios_update(request):
     return response
 
 @mb_login(url='login')
+def checks_update(request):
+    res = 1
+    if request.method == 'POST':
+        if request.POST:
+            res = 0
+            meet_id = int(request.POST.get('meet_id', 0))
+
+    response = HttpResponse()
+    response['Content-Type'] = "text/javascript"
+    response.write(json.dumps({'user':'admin','id':1,'result':res}))
+    return response
+
+@mb_login(url='login')
 def studios_get(request, meet_id=None):
     if request.is_ajax():
         meet_id = int(meet_id) if meet_id else 0
@@ -412,6 +426,34 @@ def studios_doc(request, meet_id=None):
         os.remove(fullname)
 
         return response
+
+@mb_login(url='login')
+def plan_doc(request):
+
+        filename = 'meet_planning_{}.docx'.format(timezone.now().strftime('%Y%m%d%H%M%S'))
+        fullname = "media/{}".format(filename)
+        doc = DocxTemplate("media/planning_tpl.docx")
+        context = {}
+
+        doc.render(context)
+        doc.save(fullname)
+
+        f = open(fullname, "rb")
+        s = f.read()
+        response = HttpResponse()
+        response["Content-Type"] = '{}; name="{}"'.format('application/msword', filename)
+        response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
+        response["Content-Transfer-Encoding"] = 'binary'
+        response["Content-Length"] = str(len(s))
+        response.write(s)
+        f.close()
+        os.remove(fullname)
+
+        return response
+
+@mb_login(url='login')
+def check_update(request):
+    pass
 
 def loginView(request):
     args = {}
