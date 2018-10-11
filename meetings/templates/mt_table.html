@@ -149,6 +149,9 @@
     <!-- ------------------------------------------- -->
     <!-- studiosModal ------------------------------ -->
     <!-- ------------------------------------------- -->
+    <style>
+        #studiosModal .modal-lg { width: 70%; }
+    </style>
     <div class="modal studios-modal-lg" tabindex="-1" role="dialog" id="studiosModal" data-backdrop="static" data-keyboard="false">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
@@ -178,7 +181,10 @@
     <!-- ------------------------------------------- -->
     <!-- checksModal  ------------------------------ -->
     <!-- ------------------------------------------- -->
-    <div class="modal checks-modal-lg" tabindex="-1" role="dialog" id="checksModal" data-backdrop="static" data-keyboard="false">
+    <style>
+        #checksModal .modal-lg { width: 70%; }
+    </style>
+    <div class="modal checks-modal-lg" tabindex="-1" role="dialog" id="checksModal" data-backdrop="static" data-keyboard="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -191,17 +197,17 @@
           <div class="modal-body mx-auto">
               <form action="{% url 'meetings:checksupd' %}" method="post" id="checks_form">
               {% csrf_token %}
-                    <table class="table table-sm table-hover table-bordered" id="checkTable" style="font-size: 0.9rem;">
-                      <thead>
+                    <table class="table table-sm table-hover table-bordered table-striped" id="checkTable" style="font-size: 0.9rem;">
+                      <thead class="thead-dark">
                         <tr>
-                          <th scope="col">п/п</th>
-                          <th scope="col">Видео</th>
-                          <th scope="col">Селектор</th>
-                          <th scope="col">Очное</th>
-                          <th scope="col">Загружено в САД</th>
-                          <th scope="col">Отправлено по @</th>
-                          <th scope="col">Отправлено экспед.</th>
-                          <th scope="col">Выполнено</th>
+                          <th scope="col" style="text-align: center;">п/п</th>
+                          <th scope="col" style="text-align: center;">Видео</th>
+                          <th scope="col" style="text-align: center;">Селектор</th>
+                          <th scope="col" style="text-align: center;">Очное</th>
+                          <th scope="col" style="text-align: center;">Загружено в САД</th>
+                          <th scope="col" style="text-align: center;">Отправлено по @</th>
+                          <th scope="col" style="text-align: center;">Отправлено экспед.</th>
+                          <th scope="col" style="text-align: center;">Выполнено</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -374,6 +380,7 @@
                       </tbody>
                     </table>
               <input type="hidden" name="meet_id" value="0" id="checks_meet_id"/>
+              <input type="hidden" name="id" value="0" id="checks_id"/>
               <br>
               </form>
           </div>
@@ -409,7 +416,11 @@
               <a href="#" data-toggle="tooltip" data-placement="top" title="Удалить совещание" onClick="$('#meetingDeleteButton').attr('href','{% url 'meetings:delete' m.id %}');$('#meetingDeleteModal').find('div.modal-body').find('span').text('{{ m.meet_subj }}');$('#meetingDeleteModal').modal('show');"><i class="fa fa-trash"></i></a>
               <a href="{% url 'meetings:update' m.id %}" data-toggle="tooltip" data-placement="top" title="Изменить данные"><i class="fa fa-edit"></i></a>
               <a href="{% url 'meetings:copy' m.id %}" data-toggle="tooltip" data-placement="top" title="Скопировать"><i class="fa fa-copy"></i></a>
-              <a href="#" data-toggle="tooltip" data-placement="top" title="Контроль" onClick="showCheckWindow({{ m.id }});"><i class="fa fa-check-square"></i></a>
+              <a href="#" data-toggle="tooltip" data-placement="top" title="Контроль" onClick="showCheckWindow({{ m.id }});"><!--<i class="fa fa-check-square"></i>-->
+              <div class="progress">
+                  <div class="progress-bar progress-bar-striped {% if m.complete < 50 %}bg-danger{% elif m.complete < 80 %}bg-warning{% elif m.complete < 100 %}bg-info{% else %}bg-success{% endif %}" role="progressbar" style="width: {{ m.complete }}%" aria-valuenow="{{ m.complete }}" aria-valuemin="0" aria-valuemax="100">{% if m.complete %}{{ m.complete }}%{% endif %}</div>
+              </div>
+              </a>
           </th>
           <td>{{ m.meet_date | date:"d.m.Y" }}</td>
           <td {% if m.meet_subj == '' %}class="table-warning"{% endif %}>{{ m.meet_subj }}</td>
@@ -445,6 +456,7 @@
 $(document).ready( function () {
 
     $('#meetTable').DataTable({
+            ordering:  false,
             "language": {
                           "processing": "Подождите...",
                           "search": "Поиск:",
@@ -490,7 +502,7 @@ $('#membersModal').on('show.bs.modal', function (event) {
 
     // Загружаем данные из БД
     var request = $.ajax({
-        url: "{% url 'meetings:membersget' 999 %}".replace('999', meet),
+        url: "{% url 'meetings:membersget' -1 %}".replace('-1', meet),
         type: "POST",
         data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
         dataType: "json",
@@ -598,12 +610,11 @@ $('#itemsModal').on('show.bs.modal', function (event) {
 
     // Загружаем данные из БД
     var request = $.ajax({
-        url: "{% url 'meetings:itemsget' 999 %}".replace('999', meet),
+        url: "{% url 'meetings:itemsget' -1 %}".replace('-1', meet),
         type: "POST",
         data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
         dataType: "json",
         success: function(msg) {
-            $('#itemsTable').appendGrid('load', msg);
             $('#itemsTable').appendGrid('load', msg);
         }
     });
@@ -766,7 +777,7 @@ $('#studiosModal').on('show.bs.modal', function (event) {
 
     // Загружаем данные из БД
     var request = $.ajax({
-        url: "{% url 'meetings:studiosget' 999 %}".replace('999', meet),
+        url: "{% url 'meetings:studiosget' -1 %}".replace('-1', meet),
         type: "POST",
         data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
         dataType: "json",
@@ -838,7 +849,7 @@ $(function () {
         if (0 < elem1.selectedIndex) {
             // Загружаем данные из БД для elem2
             $.ajax({
-                url: "{% url 'meetings:studiosget_bydep' 999 %}".replace('999', elem1.value),
+                url: "{% url 'meetings:studiosget_bydep' -1 %}".replace('-1', elem1.value),
                 type: "POST",
                 async: false,
                 data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
@@ -884,12 +895,46 @@ $(function () {
 //
 
 function showCheckWindow(meet_id) {
+    $('#checks_meet_id').val(meet_id);
+    $('#checks_id').val(0);
+    $('#p1_4').prop( "checked", false);
+    $('#p2_4').prop( "checked", false);
+    $('#p3_4').prop( "checked", false);
+    $('#p4_4').prop( "checked", false);
+    $('#p5_1').prop( "checked", false);
+    $('#p5_2').prop( "checked", false);
+    $('#p5_3').prop( "checked", false);
+    $('#p5_4').prop( "checked", false);
+    $('#p6_2').prop( "checked", false);
+    $('#p6_4').prop( "checked", false);
+    $('#p7_4').prop( "checked", false);
+    $('#p8_4').prop( "checked", false);
+    $('#p9_1').prop( "checked", false);
+    $('#p9_4').prop( "checked", false);
+    $('#p10_4').prop( "checked", false);
+    $('#p11_4').prop( "checked", false);
+    // Загружаем данные из БД
+    var request = $.ajax({
+        url: "{% url 'meetings:checksget' -1 %}".replace('-1', meet_id),
+        type: "POST",
+        async: false,
+        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+        dataType: "json",
+        success: function(msg) {
+            //var data = JSON.parse(msg);
+            $.each(msg, function(key, value)
+            {
+                if (key!='id')  { $('#'+key).prop( "checked", (value==1) ); }
+                else { $('#checks_id').val(value); }
+            });
+        }
+    });
     $('#checksModal').modal('show');
 };
 
 // Handle `Save` button click
 $('#checksSave').button().click(function () {
-    msg = $(document.forms[2]).serialize();
+    msg = $(document.forms[3]).serialize();
     action_url = $('#checks_form').attr("action");
     $.ajax({
         type: 'POST',

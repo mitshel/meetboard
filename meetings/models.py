@@ -109,9 +109,8 @@ class Item(models.Model):
     def __str__(self):
         return self.item_subj+' / '+self.item_time
 
-
 class Check(models.Model):
-    meeting = models.ForeignKey('Meeting', db_index=True, null=True, on_delete=models.CASCADE)
+    meeting = models.ForeignKey('Meeting', on_delete=models.CASCADE)
     p1_4 = models.IntegerField(default=0)
     p2_4 = models.IntegerField(default=0)
     p3_4 = models.IntegerField(default=0)

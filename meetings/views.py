@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.core import serializers
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
-from django.db.models import Count
+from django.db.models import Count, F
 from django.contrib.staticfiles.views import serve
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout, REDIRECT_FIELD_NAME
@@ -16,7 +16,7 @@ from django.conf import settings
 
 from docxtpl import DocxTemplate
 
-from meetings.models import MEETING_TYPE_CHOICES, Meeting, Dep, Member, Item, Studio, StudioList, mVideo, Employee
+from meetings.models import MEETING_TYPE_CHOICES, Meeting, Dep, Member, Item, Studio, StudioList, Employee, Check
 
 def mb_login(function=None, redirect_field_name=REDIRECT_FIELD_NAME, url=None):
     actual_decorator = user_passes_test(
@@ -35,7 +35,12 @@ def mb_processor(request):
 
 def home(request):
     args={}
-    args['meetings'] = Meeting.objects.filter(meet_date__gte=timezone.now()).order_by('meet_date', '-meet_start')[0:3]
+    args['meetings'] = Meeting.objects.filter(meet_date__gte=timezone.now()). \
+                           annotate(complete=(F('check__p1_4') + F('check__p2_4') + F('check__p3_4') + F('check__p4_4') + \
+                                             F('check__p5_1') + F('check__p5_2') + F('check__p5_3') + F('check__p5_4') + \
+                                             F('check__p6_2') + F('check__p6_4') + F('check__p7_4') + F('check__p8_4') + \
+                                             F('check__p9_1') + F('check__p9_4') + F('check__p10_4') + F('check__p11_4'))*100/17). \
+                           order_by('meet_date', '-meet_start')[0:3]
     return render(request,'mb_home.html', args)
 
 @mb_login(url='login')
@@ -43,9 +48,14 @@ def meet_table(request):
     args={}
 
     args['employees'] = Employee.objects.all().order_by('f','i','o','dol')
-    args['meetings'] = Meeting.objects.all().annotate(members_cnt=Count('member'),items_cnt=Count('item'),studios_cnt=Count('studiolist')).order_by('-meet_date','-meet_start')
+    args['meetings'] = Meeting.objects.all().\
+        annotate(members_cnt=Count('member'),items_cnt=Count('item'),studios_cnt=Count('studiolist')). \
+        annotate(complete=(F('check__p1_4') + F('check__p2_4') + F('check__p3_4') + F('check__p4_4') + \
+                           F('check__p5_1') + F('check__p5_2') + F('check__p5_3') + F('check__p5_4') + \
+                           F('check__p6_2') + F('check__p6_4') + F('check__p7_4') + F('check__p8_4') + \
+                           F('check__p9_1') + F('check__p9_4') + F('check__p10_4') + F('check__p11_4')) * 100 / 17). \
+        order_by('-meet_date','-meet_start')
     args['deps'] = Dep.objects.all().annotate(studios_cnt=Count('studio')).order_by('name')
-
     return render(request,'mt_table.html', args)
 
 @mb_login(url='login')
@@ -329,22 +339,8 @@ def studios_update(request):
                     else:
                         id = StudioList.objects.create(studio_id=studio_id, meeting_id=meet_id, order_n=index).id
                     id_list.append(id)
-                    print(id, studio_id, meet_id, index)
 
             StudioList.objects.filter(meeting_id=meet_id).exclude(id__in=id_list).delete()
-
-    response = HttpResponse()
-    response['Content-Type'] = "text/javascript"
-    response.write(json.dumps({'user':'admin','id':1,'result':res}))
-    return response
-
-@mb_login(url='login')
-def checks_update(request):
-    res = 1
-    if request.method == 'POST':
-        if request.POST:
-            res = 0
-            meet_id = int(request.POST.get('meet_id', 0))
 
     response = HttpResponse()
     response['Content-Type'] = "text/javascript"
@@ -452,8 +448,67 @@ def plan_doc(request):
         return response
 
 @mb_login(url='login')
-def check_update(request):
-    pass
+def checks_get(request, meet_id=None):
+    c = None
+    if request.is_ajax():
+        meet_id = int(meet_id) if meet_id else 0
+        try:
+            c = Check.objects.get(meeting_id=meet_id)
+        except:
+            c = None
+
+    if c:
+        data = json.dumps({'id':c.id,'p1_4':c.p1_4,'p2_4':c.p2_4,'p3_4':c.p3_4,
+                              'p4_4': c.p4_4,'p5_1':c.p5_1,'p5_2':c.p5_2,'p5_3':c.p5_3,'p5_4':c.p5_4,
+                              'p6_2':c.p6_2,'p6_4':c.p6_4,'p7_4':c.p7_4,'p8_4':c.p8_4,'p9_1':c.p9_1,
+                              'p9_4': c.p9_4,'p10_4':c.p10_4,'p11_4':c.p11_4})
+        print(data)
+        return HttpResponse(data,'json')
+
+    return meet_table(request)
+
+@mb_login(url='login')
+def checks_update(request):
+    res = 1
+    if request.method == 'POST':
+        if request.POST:
+            res = 0
+            meet_id = int(request.POST.get('meet_id', 0))
+            id = int(request.POST.get('id',0))
+            p1_4 = 1 if request.POST.get('p1_4', 'off')=='on' else 0
+            p2_4 = 1 if request.POST.get('p2_4', 'off')=='on' else 0
+            p3_4 = 1 if request.POST.get('p3_4', 'off')=='on' else 0
+            p4_4 = 1 if request.POST.get('p4_4', 'off')=='on' else 0
+            p5_1 = 1 if request.POST.get('p5_1', 'off')=='on' else 0
+            p5_2 = 1 if request.POST.get('p5_2', 'off')=='on' else 0
+            p5_3 = 1 if request.POST.get('p5_3', 'off')=='on' else 0
+            p5_4 = 1 if request.POST.get('p5_4', 'off')=='on' else 0
+            p6_2 = 1 if request.POST.get('p6_4', 'off')=='on' else 0
+            p6_4 = 1 if request.POST.get('p6_4', 'off')=='on' else 0
+            p7_4 = 1 if request.POST.get('p7_4', 'off')=='on' else 0
+            p8_4 = 1 if request.POST.get('p8_4', 'off')=='on' else 0
+            p9_1 = 1 if request.POST.get('p9_4', 'off')=='on' else 0
+            p9_4 = 1 if request.POST.get('p9_4', 'off')=='on' else 0
+            p10_4 = 1 if request.POST.get('p10_4', 'off')=='on' else 0
+            p11_4 = 1 if request.POST.get('p11_4', 'off')=='on' else 0
+
+            print(meet_id, id, p1_4, p2_4, p3_4, p4_4)
+
+            if id:
+                print('Update')
+                Check.objects.filter(id=id).update(meeting_id=meet_id, p1_4=p1_4, p2_4=p2_4, p3_4=p3_4, p4_4=p4_4,
+                                     p5_1=p5_1, p5_2=p5_2, p5_3=p5_3, p5_4=p5_4, p6_2=p6_2, p6_4=p6_4, p7_4=p7_4,
+                                     p8_4=p8_4, p9_1=p9_1, p9_4=p9_4, p10_4=p10_4, p11_4=p11_4)
+            else:
+                print('Create')
+                id = Check.objects.create(meeting_id=meet_id, p1_4=p1_4, p2_4=p2_4, p3_4=p3_4, p4_4=p4_4,
+                                     p5_1=p5_1, p5_2=p5_2, p5_3=p5_3, p5_4=p5_4, p6_2=p6_2, p6_4=p6_4, p7_4=p7_4,
+                                     p8_4=p8_4, p9_1=p9_1, p9_4=p9_4, p10_4=p10_4, p11_4=p11_4)
+
+    response = HttpResponse()
+    response['Content-Type'] = "text/javascript"
+    response.write(json.dumps({'user':'admin','id':1,'result':res}))
+    return response
 
 def loginView(request):
     args = {}
