@@ -36,10 +36,9 @@ def mb_processor(request):
 def home(request):
     args={}
     args['meetings'] = Meeting.objects.filter(meet_date__gte=timezone.now()). \
-                           annotate(complete=(F('check__p1_4') + F('check__p2_4') + F('check__p3_4') + F('check__p4_4') + \
-                                             F('check__p5_1') + F('check__p5_2') + F('check__p5_3') + F('check__p5_4') + \
-                                             F('check__p6_2') + F('check__p6_4') + F('check__p7_4') + F('check__p8_4') + \
-                                             F('check__p9_1') + F('check__p9_4') + F('check__p10_4') + F('check__p11_4'))*100/17). \
+                           annotate(complete=F('check__complete'),
+                                    total=F('check__total'),
+                                    progress=(F('check__complete') * 100 /F('check__total') )). \
                            order_by('meet_date', '-meet_start')[0:3]
     return render(request,'mb_home.html', args)
 
@@ -50,10 +49,9 @@ def meet_table(request):
     args['employees'] = Employee.objects.all().order_by('f','i','o','dol')
     args['meetings'] = Meeting.objects.all().\
         annotate(members_cnt=Count('member'),items_cnt=Count('item'),studios_cnt=Count('studiolist')). \
-        annotate(complete=(F('check__p1_4') + F('check__p2_4') + F('check__p3_4') + F('check__p4_4') + \
-                           F('check__p5_1') + F('check__p5_2') + F('check__p5_3') + F('check__p5_4') + \
-                           F('check__p6_2') + F('check__p6_4') + F('check__p7_4') + F('check__p8_4') + \
-                           F('check__p9_1') + F('check__p9_4') + F('check__p10_4') + F('check__p11_4')) * 100 / 17). \
+        annotate(complete=F('check__complete'),
+                 total=F('check__total'),
+                 progress=(F('check__complete') * 100 / F('check__total') )). \
         order_by('-meet_date','-meet_start')
     args['deps'] = Dep.objects.all().annotate(studios_cnt=Count('studio')).order_by('name')
     return render(request,'mt_table.html', args)
@@ -447,68 +445,82 @@ def plan_doc(request):
 
         return response
 
+# @mb_login(url='login')
+# def checks_get(request, meet_id=None):
+#     c = None
+#     if request.is_ajax():
+#         meet_id = int(meet_id) if meet_id else 0
+#         try:
+#             c = Check.objects.get(meeting_id=meet_id)
+#         except:
+#             c = None
+#
+#     if c:
+#         data = json.dumps({'id':c.id,'p1_4':c.p1_4,'p2_4':c.p2_4,'p3_4':c.p3_4,
+#                               'p4_4': c.p4_4,'p5_1':c.p5_1,'p5_2':c.p5_2,'p5_3':c.p5_3,'p5_4':c.p5_4,
+#                               'p6_2':c.p6_2,'p6_4':c.p6_4,'p7_4':c.p7_4,'p8_4':c.p8_4,'p9_1':c.p9_1,
+#                               'p9_4': c.p9_4,'p10_4':c.p10_4,'p11_4':c.p11_4})
+#         print(data)
+#         return HttpResponse(data,'json')
+#
+#     return meet_table(request)
+
 @mb_login(url='login')
-def checks_get(request, meet_id=None):
-    c = None
-    if request.is_ajax():
-        meet_id = int(meet_id) if meet_id else 0
-        try:
-            c = Check.objects.get(meeting_id=meet_id)
-        except:
-            c = None
+def checks_update(request, meet_id=None):
+    args={}
+    args.update(csrf(request))
+    meet =  None
+    try:
+        meet_id=int(meet_id)
+    except:
+        meet_id=None
 
-    if c:
-        data = json.dumps({'id':c.id,'p1_4':c.p1_4,'p2_4':c.p2_4,'p3_4':c.p3_4,
-                              'p4_4': c.p4_4,'p5_1':c.p5_1,'p5_2':c.p5_2,'p5_3':c.p5_3,'p5_4':c.p5_4,
-                              'p6_2':c.p6_2,'p6_4':c.p6_4,'p7_4':c.p7_4,'p8_4':c.p8_4,'p9_1':c.p9_1,
-                              'p9_4': c.p9_4,'p10_4':c.p10_4,'p11_4':c.p11_4})
-        print(data)
-        return HttpResponse(data,'json')
-
-    return meet_table(request)
-
-@mb_login(url='login')
-def checks_update(request):
-    res = 1
+    # if this is a POST request we need to process the form data
     if request.method == 'POST':
         if request.POST:
-            res = 0
-            meet_id = int(request.POST.get('meet_id', 0))
-            id = int(request.POST.get('id',0))
-            p1_4 = 1 if request.POST.get('p1_4', 'off')=='on' else 0
-            p2_4 = 1 if request.POST.get('p2_4', 'off')=='on' else 0
-            p3_4 = 1 if request.POST.get('p3_4', 'off')=='on' else 0
-            p4_4 = 1 if request.POST.get('p4_4', 'off')=='on' else 0
-            p5_1 = 1 if request.POST.get('p5_1', 'off')=='on' else 0
-            p5_2 = 1 if request.POST.get('p5_2', 'off')=='on' else 0
-            p5_3 = 1 if request.POST.get('p5_3', 'off')=='on' else 0
-            p5_4 = 1 if request.POST.get('p5_4', 'off')=='on' else 0
-            p6_2 = 1 if request.POST.get('p6_4', 'off')=='on' else 0
-            p6_4 = 1 if request.POST.get('p6_4', 'off')=='on' else 0
-            p7_4 = 1 if request.POST.get('p7_4', 'off')=='on' else 0
-            p8_4 = 1 if request.POST.get('p8_4', 'off')=='on' else 0
-            p9_1 = 1 if request.POST.get('p9_4', 'off')=='on' else 0
-            p9_4 = 1 if request.POST.get('p9_4', 'off')=='on' else 0
-            p10_4 = 1 if request.POST.get('p10_4', 'off')=='on' else 0
-            p11_4 = 1 if request.POST.get('p11_4', 'off')=='on' else 0
+            post = request.POST.copy()
+            # Оставляем только параметры, которые начинаются на 'p"
+            for key in list(post.keys()):
+                if key[0:1]!='p':
+                    del post[key]
 
-            print(meet_id, id, p1_4, p2_4, p3_4, p4_4)
+            data = json.dumps(post)
+            try:
+                id = int(request.POST.get('id', 0))
+            except:
+                id = 0
+            total = int(request.POST.get('total', 0))
+            complete = int(request.POST.get('complete', 0))
 
             if id:
-                print('Update')
-                Check.objects.filter(id=id).update(meeting_id=meet_id, p1_4=p1_4, p2_4=p2_4, p3_4=p3_4, p4_4=p4_4,
-                                     p5_1=p5_1, p5_2=p5_2, p5_3=p5_3, p5_4=p5_4, p6_2=p6_2, p6_4=p6_4, p7_4=p7_4,
-                                     p8_4=p8_4, p9_1=p9_1, p9_4=p9_4, p10_4=p10_4, p11_4=p11_4)
+                Check.objects.filter(id=id).update(meeting_id=meet_id, data=data, total=total, complete=complete)
             else:
-                print('Create')
-                id = Check.objects.create(meeting_id=meet_id, p1_4=p1_4, p2_4=p2_4, p3_4=p3_4, p4_4=p4_4,
-                                     p5_1=p5_1, p5_2=p5_2, p5_3=p5_3, p5_4=p5_4, p6_2=p6_2, p6_4=p6_4, p7_4=p7_4,
-                                     p8_4=p8_4, p9_1=p9_1, p9_4=p9_4, p10_4=p10_4, p11_4=p11_4)
+                id=Check.objects.create(meeting_id=meet_id, data=data, total=total, complete=complete)
 
-    response = HttpResponse()
-    response['Content-Type'] = "text/javascript"
-    response.write(json.dumps({'user':'admin','id':1,'result':res}))
-    return response
+            return redirect(reverse("meetings:table"))
+
+    if meet_id:
+        try:
+            meet = Meeting.objects.get(id=meet_id)
+        except Meeting.DoesNotExist:
+            meet = None
+
+        try:
+            checks = Check.objects.get(meeting_id=meet_id)
+        except Check.DoesNotExist:
+            checks = None
+
+
+    if meet: args['meet']=meet
+    if checks:
+        args['checks'] = json.loads(checks.data)
+        args['id'] = checks.id
+        args['total'] = checks.total
+        args['complete'] = checks.complete
+    args['meet_id'] = meet_id if meet_id else 0
+    args['meeting_type_choices'] = MEETING_TYPE_CHOICES
+
+    return render(request,'mt_check.html', args)
 
 def loginView(request):
     args = {}

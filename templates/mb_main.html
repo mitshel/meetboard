@@ -83,11 +83,11 @@
                     <a href="{% url 'meetings:membersdoc' meeting.id %}" target='_blank' data-toggle="tooltip" data-placement="top" title="Формировать список участников" onClick=""><i class="fa fa-users"></i></a>
                     <a href="{% url 'meetings:itemsdoc' meeting.id %}" target='_blank' data-toggle="tooltip" data-placement="top" title="Формировать повестку" onClick=""><i class="fa fa-list"></i></a>
                     <a href="{% url 'meetings:studiosdoc' meeting.id %}" target='_blank' data-toggle="tooltip" data-placement="top" title="Формировать заявку" onClick=""><i class="fa fa-file"></i></a>
-                  <a href="#" data-toggle="tooltip" data-placement="top" title="Контроль" onClick="showCheckWindow({{ m.id }});"><!--<i class="fa fa-check-square"></i>-->
-                  <div class="progress">
-                      <div class="progress-bar progress-bar-striped {% if meeting.complete < 50 %}bg-danger{% elif meeting.complete < 80 %}bg-warning{% elif meeting.complete < 100 %}bg-info{% else %}bg-success{% endif %}" role="progressbar" style="width: {{ meeting.complete }}%" aria-valuenow="{{ meeting.complete }}" aria-valuemin="0" aria-valuemax="100">{% if meeting.complete %}{{ meeting.complete }}%{% endif %}</div>
-                  </div>
-                  </a>
+                    <a href="{% url 'meetings:checksupd' meeting.id %}" data-toggle="tooltip" data-placement="top" title="Контроль");"><!--<i class="fa fa-check-square"></i>-->
+                      <div class="progress">
+                          <div class="progress-bar progress-bar-striped {% if meeting.progress < 50 %}bg-danger{% elif meeting.progress < 80 %}bg-warning{% elif meeting.progress < 100 %}bg-info{% else %}bg-success{% endif %}" role="progressbar" style="width: {{ meeting.progress }}%" aria-valuenow="{{ meeting.complete }}" aria-valuemin="0" aria-valuemax="{{ meeting.total }}">{% if meeting.complete %}{{ meeting.progress }}%{% endif %}</div>
+                      </div>
+                    </a>
                     <p>
                         <b>Тема:</b> {{ meeting.meet_subj }}<br>
                         <b>Время:</b> {{ meeting.meet_start }}-{{ meeting.meet_end }}<br>

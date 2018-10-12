@@ -1,0 +1,233 @@
+{% extends "mb_main.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+
+    <h5>
+        Контроль подготовки к совещанию <b>"{{ meet.meet_subj }}"</b><br>
+        Дата/время совещания: <b>{{ meet.meet_date }} {{ meet.meet_start }}-{{ meet.meet_end }}</b>
+    </h5>
+    <br>
+    <!-- ------------------------------------------- -->
+    <!-- checks_form  ------------------------------ -->
+    <!-- ------------------------------------------- -->
+      <form action="{% url 'meetings:checksupd' meet_id %}" method="post" id="checks_form">
+      {% csrf_token %}
+            <table class="table table-sm table-hover table-bordered table-striped" id="checkTable" style="font-size: 0.9rem;">
+              <thead class="thead-dark">
+                <tr>
+                  <th scope="col" style="text-align: center;">п/п</th>
+                  <th scope="col" style="text-align: center;">Видео</th>
+                  <th scope="col" style="text-align: center;">Селектор</th>
+                  <th scope="col" style="text-align: center;">Очное</th>
+                  <th scope="col" style="text-align: center;">Загружено в САД</th>
+                  <th scope="col" style="text-align: center;">Отправлено по @</th>
+                  <th scope="col" style="text-align: center;">Отправлено экспед.</th>
+                  <th scope="col" style="text-align: center;">Выполнено</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">1.</th>
+                  <td colspan="3">Определить дату, время, тему совещания (Спросить у инициатора совещания)</td>
+                  <td id="tdp1_1" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp1_2" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp1_3" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp1_4" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p1_4" name="p1_4">
+                      </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">2.</th>
+                  <td colspan="3">Составить список участников (Спросить у инициатора совещания)</td>
+                  <td id="tdp2_1" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp2_2" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp2_3" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp2_4" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p2_4" name="p2_4">
+                      </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">3.</th>
+                  <td colspan="3">Составить повестку совещания (Спросить у инициатора совещания)</td>
+                  <td id="tdp3_1" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp3_2" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp3_3" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp3_4" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p3_4" name="p3_4">
+                      </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">4.</th>
+                  <td colspan="3">Позвонить всем участникам, выяснить все ньюансы их участия</td>
+                  <td id="tdp4_1" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp4_2" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp4_3" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp4_4" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p4_4" name="p4_4">
+                      </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">5.</th>
+                  <td colspan="3">Написать всем письмо, об участии в совещании</td>
+                  <td id="tdp5_1" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p5_1" name="p5_1">
+                      </div>
+                  </td>
+                  <td id="tdp5_2" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p5_2" name="p5_2">
+                      </div>
+                  </td>
+                    <td id="tdp5_3" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p5_3" name="p5_3">
+                      </div>
+                  </td>
+                  <td id="tdp5_4" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p5_4" name="p5_4">
+                      </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">6.</th>
+                  <td colspan="3">Разослать список участников и повестку совещания всем участникам</td>
+                  <td id="tdp6_1" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp6_2" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p6_2" name="p6_2">
+                      </div>
+                  </td>
+                  <td id="tdp6_3" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp6_4" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p6_4" name="p6_4">
+                      </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">7.</th>
+                  <td>Зарезервировать студию</td>
+                  <td style="text-align: center;"><b>X</b></td>
+                  <td style="text-align: center;"><b>X</b></td>
+                  <td id="tdp7_1" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp7_2" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp7_3" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp7_4" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p7_4" name="p7_4">
+                      </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">8.</th>
+                  <td>Узнать адреса студий участников</td>
+                  <td style="text-align: center;"><b>X</b></td>
+                  <td style="text-align: center;"><b>X</b></td>
+                  <td id="tdp8_1" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp8_2" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp8_3" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp8_4" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p8_4" name="p8_4">
+                      </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">9.</th>
+                  <td>Отправить служебку о подключении ВКС</td>
+                  <td style="text-align: center;"><b>X</b></td>
+                  <td style="text-align: center;"><b>X</b></td>
+                  <td id="tdp9_1" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p9_1" name="p9_1">
+                      </div>
+                  </td>
+                  <td id="tdp9_2" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp9_3" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp9_4" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p9_4" name="p9_4">
+                      </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">10.</th>
+                  <td>Позвонить по номеру 9-10-10, сказать номер служебки</td>
+                  <td>Позвонить по номеру 9-10-10, сообщить номера телефонов участников</td>
+                  <td>Уточнить всех прибывших на совещание</td>
+                  <td id="tdp10_1" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp10_2" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp10_3" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp10_4" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p10_4" name="p10_4">
+                      </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">11.</th>
+                  <td style="text-align: center;"><b>X</b></td>
+                  <td style="text-align: center;"><b>X</b></td>
+                  <td style="text-align: center;">Обеспечить всех участников материалами к совещанию</td>
+                  <td id="tdp11_1" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p9_1" name="p9_1">
+                      </div>
+                  </td>
+                  <td id="tdp11_2" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp11_3" style="text-align: center;"><b>X</b></td>
+                  <td id="tdp11_4" style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="p11_4" name="p11_4">
+                      </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          <input type="hidden" name="id" value="{{ id }}">
+          <input type="hidden" name="total" value="{{ total }}" id="inpTotal">
+          <input type="hidden" name="complete" value="{{ complete }}" id="inpComplete">
+      <br>
+      <a href="{% url 'meetings:table' %}" role="button" class="btn btn-secondary">Отмена</a>
+      <button type="submit" class="btn btn-primary" id="#checksSave">Сохранить</button>
+      </form>
+</div>
+{% endblock %}  {# content #}
+
+{% block js-block %}
+<script type="text/javascript">
+////////////////////////////////////////////////////////////////
+// checkModal Settings and Functions
+//
+
+data = {% autoescape off %}{{ checks }}{% endautoescape %};
+
+$('input:checked').prop('checked', false);
+
+// Загружаем данные из БД
+$.each(data, function(key, value) {
+    $('#'+key).prop( "checked", (value=='on') );
+});
+
+// Функция подсчета Total и Completed
+$('input[type="checkbox"]').click(function() {
+    var total = $('input[type="checkbox"]').length;
+    var complete = $('input:checked').length;
+    $('#inpTotal').val(total);
+    $('#inpComplete').val(complete);
+});
+</script>
+{% endblock %}  {# js-block #}
