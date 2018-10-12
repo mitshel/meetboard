@@ -15,7 +15,7 @@
     <!-- ------------------------------------------- -->
       <form action="{% url 'meetings:checksupd' meet_id %}" method="post" id="checks_form">
       {% csrf_token %}
-            <table class="table table-sm table-hover table-bordered table-striped" id="checkTable" style="font-size: 0.9rem;">
+            <table class="table table-sm table-hover table-bordered table-striped table-responsive" id="checkTable" style="font-size: 0.9rem;">
               <thead class="thead-dark">
                 <tr>
                   <th scope="col" style="text-align: center;">п/п</th>
