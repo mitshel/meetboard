@@ -504,19 +504,36 @@ def checks_update(request, meet_id=None):
             meet = Meeting.objects.get(id=meet_id)
         except Meeting.DoesNotExist:
             meet = None
-
         try:
             checks = Check.objects.get(meeting_id=meet_id)
         except Check.DoesNotExist:
             checks = None
 
-
-    if meet: args['meet']=meet
     if checks:
-        args['checks'] = json.loads(checks.data)
+        checks_json=json.loads(checks.data)
         args['id'] = checks.id
         args['total'] = checks.total
         args['complete'] = checks.complete
+    else:
+        checks_json = {}
+
+    members=Member.objects.filter(meeting_id=meet_id)
+    items = Item.objects.filter(meeting_id=meet_id)
+    studios=meet.studios
+
+    if studios:
+        checks_json['p_studios'] = 'on'
+        args['studios'] = studios
+    if members:
+        checks_json['p_members'] = 'on'
+        args['members'] = members
+    if items:
+        checks_json['p_items'] = 'on'
+        args['items'] = items
+    if meet:
+        args['meet'] = meet
+
+    args['checks'] = checks_json
     args['meet_id'] = meet_id if meet_id else 0
     args['meeting_type_choices'] = MEETING_TYPE_CHOICES
 
