@@ -7,7 +7,7 @@
     <div class="col-sm-12">
         <div class="btn-group" role="group" aria-label="meetings menu">
               <a type="button" class="btn btn-primary" href="{% url 'meetings:add' %}"><i class="fa fa-plus"></i> Создать совещание </a>
-              <a type="button" class="btn btn-primary" href="{% url 'meetings:plandoc' %}"><i class="fa fa-list"></i> Пплан подготовки </a>
+              <a type="button" class="btn btn-primary" href="{% url 'meetings:plandoc' %}"><i class="fa fa-list"></i> План подготовки </a>
         </div>
     </div>
     </div>
@@ -181,7 +181,7 @@
     <!-- ------------------------------------------- -->
     <!-- meetTable          ------------------------ -->
     <!-- ------------------------------------------- -->
-    <table class="table table-sm table-hover display table-responsive" id="meetTable">
+    <table class="table table-sm table-hover display w-100" width="100%" id="meetTable">
       <thead>
         <tr>
           <th scope="col">Действия</th>
