@@ -2,6 +2,9 @@
 import os
 import sys
 
+# Imports for PyInstaller
+import meetings
+
 if __name__ == '__main__':
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'meetboard.settings')
     try:

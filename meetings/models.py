@@ -110,7 +110,7 @@ class Item(models.Model):
         return self.item_subj+' / '+self.item_time
 
 class Check(models.Model):
-    meeting = models.ForeignKey('Meeting', on_delete=models.CASCADE, unique=True)
+    meeting = models.ForeignKey('Meeting', on_delete=models.CASCADE, db_index=True, unique=True)
     data = models.TextField(default="")
     complete = models.IntegerField(default=0)
     total = models.IntegerField(default=1)
