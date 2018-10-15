@@ -47,6 +47,7 @@ class Member(models.Model):
     is_speaker = models.IntegerField(default=0)
     is_lead = models.IntegerField(default=0)
     is_init = models.IntegerField(default=0)
+    is_presence = models.IntegerField(default=0)
     order_n = models.PositiveIntegerField(null=False, default=0)
 
     def __str__(self):

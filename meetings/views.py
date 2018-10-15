@@ -135,6 +135,7 @@ def members_update(request):
     res = 1
     if request.method == 'POST':
         if request.POST:
+            #print(request.POST)
             res = 0
             id_list = []
             meet_id = int(request.POST.get('meet_id',0))
@@ -152,15 +153,16 @@ def members_update(request):
                     is_speaker = request.POST.get('membersTable_is_speaker_{}'.format(ordern),0)
                     is_init = request.POST.get('membersTable_is_init_{}'.format(ordern),0)
                     is_lead = request.POST.get('membersTable_is_lead_{}'.format(ordern),0)
+                    is_presence = request.POST.get('membersTable_is_presence_{}'.format(ordern), 0)
 
                     if id:
-                        Member.objects.update(id=id, dep=dep, f=f, i=i, o=o, dol=dol, fio = fio,
+                        Member.objects.filter(id=id).update(dep=dep, f=f, i=i, o=o, dol=dol, fio = fio,
                                               is_speaker=is_speaker, is_lead=is_lead, is_init=is_init,
-                                              meeting_id=meet_id, order_n=index)
+                                              meeting_id=meet_id, order_n=index, is_presence=is_presence)
                     else:
                         id=Member.objects.create(dep=dep, f=f, i=i, o=o, dol=dol, fio = fio,
                                               is_speaker=is_speaker, is_lead=is_lead, is_init=is_init,
-                                              meeting_id=meet_id, order_n=index).id
+                                              meeting_id=meet_id, order_n=index, is_presence=is_presence).id
                     id_list.append(id)
                     # print(id, dep, f, i, o, dol, is_speaker, fio,meet_id, index)
 
@@ -445,26 +447,6 @@ def plan_doc(request):
 
         return response
 
-# @mb_login(url='login')
-# def checks_get(request, meet_id=None):
-#     c = None
-#     if request.is_ajax():
-#         meet_id = int(meet_id) if meet_id else 0
-#         try:
-#             c = Check.objects.get(meeting_id=meet_id)
-#         except:
-#             c = None
-#
-#     if c:
-#         data = json.dumps({'id':c.id,'p1_4':c.p1_4,'p2_4':c.p2_4,'p3_4':c.p3_4,
-#                               'p4_4': c.p4_4,'p5_1':c.p5_1,'p5_2':c.p5_2,'p5_3':c.p5_3,'p5_4':c.p5_4,
-#                               'p6_2':c.p6_2,'p6_4':c.p6_4,'p7_4':c.p7_4,'p8_4':c.p8_4,'p9_1':c.p9_1,
-#                               'p9_4': c.p9_4,'p10_4':c.p10_4,'p11_4':c.p11_4})
-#         print(data)
-#         return HttpResponse(data,'json')
-#
-#     return meet_table(request)
-
 @mb_login(url='login')
 def checks_update(request, meet_id=None):
     args={}
@@ -527,6 +509,7 @@ def checks_update(request, meet_id=None):
     if members:
         checks_json['p_members'] = 'on'
         args['members'] = members
+        args['is_presence'] = members.filter(is_presence=1).count()
     if items:
         checks_json['p_items'] = 'on'
         args['items'] = items

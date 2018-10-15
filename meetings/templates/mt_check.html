@@ -19,7 +19,7 @@
     <div>
       <form action="{% url 'meetings:checksupd' meet_id %}" method="post" id="checks_form">
       {% csrf_token %}
-            <table class="table table-sm table-hover table-bordered table-striped table-responsive w-100" id="checkTable" width="100%" style="font-size: 0.9rem;">
+            <table class="table table-sm table-hover table-bordered table-responsive w-100" id="checkTable" width="100%" style="font-size: 0.9rem;">
               <thead class="thead-dark">
                 <tr>
                   <th scope="col" style="text-align: center;">п/п</th>
@@ -28,32 +28,32 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
+                <tr class="table-info">
                   <th scope="row">1.</th>
                   <td style="text-align: center;">
                       <div class="form-group form-check">
                         <input type="checkbox" class="form-check-input" id="p_studios" name="p_studios" disabled>
                       </div>
                   </td>
-                  <td colspan="3" scope="col">Студия зарезервирована</td>
+                    <td colspan="3" scope="col"><span id="tp_studios" style="font-weight:bold">Студия зарезервирована</span></td>
                 </tr>
-                <tr>
+                <tr class="table-info">
                   <th scope="row">2.</th>
                   <td style="text-align: center;">
                       <div class="form-group form-check">
                         <input type="checkbox" class="form-check-input" id="p_members" name="p_members" disabled>
                       </div>
                   </td>
-                  <td colspan="3" scope="col">Список участников подготовлен</td>
+                    <td colspan="3" scope="col"><span id="tp_members" style="font-weight:bold">Список участников подготовлен</span></td>
                 </tr>
-                <tr>
+                <tr  class="table-info">
                   <th scope="row">3.</th>
                   <td style="text-align: center;">
                       <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" id="p_callmembers" name="p_callmembers">
+                        <input type="checkbox" class="form-check-input" id="pm" name="pm" disabled>
                       </div>
                   </td>
-                  <td colspan="3" scope="col">Обзвонить участников и подтвердить участие</td>
+                    <td colspan="3" scope="col"><span id="tpm" style="font-weight:bold">Обзвонить участников и подтвердить участие</span></td>
                 </tr>
                 {% for m in members %}
                 <tr>
@@ -67,23 +67,23 @@
                   </td>
                 </tr>
                {% endfor %}
-                <tr>
+                <tr class="table-info">
                   <th scope="row">4.</th>
                   <td style="text-align: center;">
                       <div class="form-group form-check">
                         <input type="checkbox" class="form-check-input" id="p_items" name="p_items" disabled>
                       </div>
                   </td>
-                  <td colspan="3" scope="col">Подготовить повестку совещания</td>
+                    <td colspan="3" scope="col"><span id="tp_items" style="font-weight:bold">Подготовить повестку совещания</span></td>
                 </tr>
-                <tr>
+                <tr class="table-info">
                   <th scope="row">5.</th>
                   <td style="text-align: center;">
                       <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" id="pi_" name="pi_">
+                        <input type="checkbox" class="form-check-input" id="pi" name="pi" disabled>
                       </div>
                   </td>
-                  <td colspan="3" scope="col">Подготовить письмо в адрес участников</td>
+                    <td colspan="3" scope="col"><span id="tpi" style="font-weight:bold">Подготовить письмо в адрес участников</span></td>
                 </tr>
                 <tr>
                   <th scope="row"></th>
@@ -107,14 +107,14 @@
                       </div>
                   </td>
                </tr>
-                <tr>
+                <tr class="table-info">
                   <th scope="row">6.</th>
                   <td style="text-align: center;">
                       <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" id="p_pps_" name="p_pps_">
+                        <input type="checkbox" class="form-check-input" id="pp" name="pp" disabled>
                       </div>
                   </td>
-                  <td colspan="3" scope="col">Письмо, повестка, список участников</td>
+                    <td colspan="3" scope="col"><span id="tpp" style="font-weight:bold">Письмо, повестка, список участников</span></td>
                 </tr>
                 <tr>
                   <th scope="row"></th>
@@ -129,32 +129,32 @@
                   <td></td>
                   <td>
                       <div class="form-group form-check" style="margin-bottom: 0;">
-                        <input type="checkbox" class="form-check-input" id="p_pps_1_{{ m.id }}" name="p_pps_1_{{ m.id }}">
-                        <label class="form-check-label" for="p_pps_1_{{ m.id }}">{{ m.fio }}</label>
+                        <input type="checkbox" class="form-check-input" id="pp_1_{{ m.id }}" name="pp_1_{{ m.id }}">
+                        <label class="form-check-label" for="pp_1_{{ m.id }}">{{ m.fio }}</label>
                       </div>
                   </td>
                    <td>
                       <div class="form-group form-check" style="margin-bottom: 0;">
-                        <input type="checkbox" class="form-check-input" id="p_pps_2_{{ m.id }}" name="p_pps_2_{{ m.id }}">
-                        <label class="form-check-label" for="p_pps_2_{{ m.id }}">{{ m.fio }}</label>
+                        <input type="checkbox" class="form-check-input" id="pp_2_{{ m.id }}" name="pp_2_{{ m.id }}">
+                        <label class="form-check-label" for="pp_2_{{ m.id }}">{{ m.fio }}</label>
                       </div>
                   </td>
                   <td>
                       <div class="form-group form-check" style="margin-bottom: 0;">
-                        <input type="checkbox" class="form-check-input" id="p_pps_3_{{ m.id }}" name="p_pps_3_{{ m.id }}">
-                        <label class="form-check-label" for="p_pps_3_{{ m.id }}">{{ m.fio }}</label>
+                        <input type="checkbox" class="form-check-input" id="pp_3_{{ m.id }}" name="pp_3_{{ m.id }}">
+                        <label class="form-check-label" for="pp_3_{{ m.id }}">{{ m.fio }}</label>
                       </div>
                   </td>
                 </tr>
                {% endfor %}
-                <tr>
+                <tr class="table-info">
                   <th scope="row">7.</th>
                   <td style="text-align: center;">
                       <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" id="ps_" name="ps_">
+                        <input type="checkbox" class="form-check-input" id="ps" name="ps" disabled>
                       </div>
                   </td>
-                  <td colspan="3" scope="col">Получить от участников адреса студий</td>
+                    <td colspan="3" scope="col"><span id="tps" style="font-weight:bold">Получить от участников адреса студий</span></td>
                 </tr>
                 <tr>
                   <th scope="row"></th>
@@ -169,14 +169,14 @@
                   </td>
                 </tr>
                 {%  if meet.meet_type == 'V' %}
-                <tr>
+                <tr class="table-info">
                   <th scope="row">8.</th>
                   <td style="text-align: center;">
                       <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" id="pv_" name="pv_">
+                        <input type="checkbox" class="form-check-input" id="pv" name="pv" disabled>
                       </div>
                   </td>
-                  <td colspan="3" scope="col">Подготовить заявку на студию в Департамент 741</td>
+                    <td colspan="3" scope="col"><span id="tpv" style="font-weight:bold">Подготовить заявку на студию в Департамент 741</span></td>
                 </tr>
                 <tr>
                   <th scope="row"></th>
@@ -201,14 +201,14 @@
                   </td>
                </tr>
                 {% endif %}
-                <tr>
+                <tr class="table-info">
                   <th scope="row">9.</th>
                   <td style="text-align: center;">
                       <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" id="pd_" name="pd_">
+                        <input type="checkbox" class="form-check-input" id="pd" name="pd" disabled>
                       </div>
                   </td>
-                  <td colspan="3" scope="col">Получить доклады от участников</td>
+                    <td colspan="3" scope="col"><span id="tpd" style="font-weight:bold">Получить доклады от участников</span></td>
                 </tr>
                 <tr>
                   <th scope="row"></th>
@@ -224,23 +224,14 @@
                       {% endfor %}
                   </td>
                 </tr>
-                <tr>
-                  <th scope="row">9.1</th>
+                <tr class="table-info">
+                  <th scope="row">10.</th>
                   <td style="text-align: center;">
                       <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" id="pinit_" name="pinit_">
+                        <input type="checkbox" class="form-check-input" id="pa" name="pa" disabled>
                       </div>
                   </td>
-                  <td colspan="3" scope="col">Направить доклады участников инициатору совещания</td>
-                </tr>
-                <tr>
-                  <th scope="row">9.2</th>
-                  <td style="text-align: center;">
-                      <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" id="pds_" name="pds_">
-                      </div>
-                  </td>
-                  <td colspan="3" scope="col">Направить доклады всем участникам</td>
+                    <td colspan="3" scope="col"><span id="tpa" style="font-weight:bold">Направить доклады всем участникам</span></td>
                 </tr>
                 <tr>
                   <th scope="row"></th>
@@ -248,20 +239,20 @@
                   <td colspan="3">
                       {% for m in members %}
                           <div class="form-group form-check form-check-inline" style="margin-bottom:0;">
-                            <input type="checkbox" class="form-check-input" id="pds_{{ m.id }}" name="pds_{{ m.id }}">
-                            <label class="form-check-label" for="pds_{{ m.id }}">{{ m.fio }}</label>
+                            <input type="checkbox" class="form-check-input" id="pa_{{ m.id }}" name="pa_{{ m.id }}">
+                            <label class="form-check-label" for="pa_{{ m.id }}">{{ m.fio }}</label>
                           </div>
                       {% endfor %}
                   </td>
                 </tr>
-                <tr>
-                  <th scope="row">10</th>
+                <tr class="table-info">
+                  <th scope="row">11.</th>
                   <td style="text-align: center;">
                       <div class="form-group form-check">
-                        <input type="checkbox" class="form-check-input" id="po_" name="po_">
+                        <input type="checkbox" class="form-check-input" id="po" name="po" disabled>
                       </div>
                   </td>
-                  <td colspan="3" scope="col">Подтвердить участие за 1 день до совещания (обзвон)</td>
+                    <td colspan="3" scope="col"><span id="tpo" style="font-weight:bold">Подтвердить участие за 1 день до совещания (обзвон)</span></td>
                 </tr>
                 <tr>
                   <th scope="row"></th>
@@ -275,6 +266,32 @@
                       {% endfor %}
                   </td>
                 </tr>
+                </tr>
+                {% if is_presence %}
+                <tr class="table-info">
+                  <th scope="row">12.</th>
+                  <td style="text-align: center;">
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="pr" name="pr" disabled>
+                      </div>
+                  </td>
+                    <td colspan="3" scope="col"><span id="tpr" style="font-weight:bold">Материалы совещания распечатаны (список, повестка, доклады)</span></td>
+                </tr>
+                <tr>
+                  <th scope="row"></th>
+                  <td></td>
+                  <td colspan="3">
+                      {% for m in members %}
+                          {% if m.is_presence %}
+                              <div class="form-group form-check form-check-inline" style="margin-bottom:0;">
+                                <input type="checkbox" class="form-check-input" id="pr_{{ m.id }}" name="pr_{{ m.id }}">
+                                <label class="form-check-label" for="pr_{{ m.id }}">{{ m.fio }}</label>
+                              </div>
+                          {% endif %}
+                      {% endfor %}
+                  </td>
+                </tr>
+              {% endif %}
               </tbody>
             </table>
           <input type="hidden" name="id" value="{{ id }}">
@@ -283,6 +300,7 @@
       <br>
       <a href="{% url 'meetings:table' %}" role="button" class="btn btn-secondary">Отмена</a>
       <button type="submit" class="btn btn-primary" id="#checksSave">Сохранить</button>
+          <button type="button" role="button" class="btn btn-primary" onclick="javascript:(print());"><i class="fa fa-print"></i> Печать</button>
       </form>
 </div>
 </div>
@@ -296,7 +314,35 @@
 
 data = {% autoescape off %}{{ checks }}{% endautoescape %};
 
-function calcProgress() {
+function calcProgress(elem) {
+    // Проставляем галки на "общих чекбоксах"
+    var arr = ["pm", "pi", "pp", "ps", "pv", "pd", "pa", "po", "pr"];
+    arr.forEach(function(item, i, arr) {
+        //var elem_id = elem.attr("id");
+        //var group_id = elem_id.substr(0,2);
+        var group_id = item;
+        var group_prefix = group_id+'_';
+
+        var group_total = $('input[id^='+group_prefix+']').length;
+        var group_complete = $('input[id^='+group_prefix+']:checked').length;
+
+        $('#' + group_id).prop("checked", (group_total == group_complete));
+
+        //if (group_total == group_complete) {
+        //    $('#t' + group_id).attr("style", 'font-weight:bold');
+        //} else {
+        //    $('#t' + group_id).attr("style", '');
+        //}
+    });
+    //var arr1 =['p_studios', 'p_members', 'p_items'];
+    //arr1.forEach(function(item, i, arr1) {
+    //    if ($('#' + item).prop('checked')) {
+    //        $('#t' + item).attr("style", 'font-weight:bold');
+    //    } else {
+    //        $('#t' + item).attr("style", '');
+    //    }
+    //});
+
     // Считаем Total и Completed
     var total = $('input[type="checkbox"]').length;
     var complete = $('input:checked').length;
@@ -310,7 +356,7 @@ function calcProgress() {
     else if (progress < 80) { $('#progressbar').removeClass("bg-danger bg-info bg-success").addClass("bg-warning"); }
     else if (progress < 100) { $('#progressbar').removeClass("bg-danger bg-warning bg-success").addClass("bg-info"); }
     else { $('#progressbar').removeClass("bg-danger bg-warning bg-info").addClass("bg-success"); };
-}
+};
 
 $(document).ready(function() {
     // Сбрасываем все галки на чекбоксах
@@ -321,12 +367,12 @@ $(document).ready(function() {
         $('#'+key).prop( "checked", (value=='on') );
     });
 
-    calcProgress();
+    calcProgress(null);
 });
 
 // Функция подсчета Total и Completed
 $('input[type="checkbox"]').click(function() {
-    calcProgress();
+    calcProgress($(this));
 });
 
 </script>
