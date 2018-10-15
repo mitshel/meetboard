@@ -1,39 +1,21 @@
 import datetime
 import json
 import os
+from docxtpl import DocxTemplate
 
 from django.template.context_processors import csrf
 from django.http import HttpResponse
-from django.core import serializers
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 from django.contrib.staticfiles.views import serve
 from django.utils import timezone
-from django.contrib.auth import authenticate, login, logout, REDIRECT_FIELD_NAME
-from django.contrib.auth.decorators import user_passes_test
-from django.conf import settings
 
-from docxtpl import DocxTemplate
+from mb_auth.views import mb_login
 
 from meetings.models import MEETING_TYPE_CHOICES, Meeting, Dep, Member, Item, Studio, StudioList, Employee, Check
 
-def mb_login(function=None, redirect_field_name=REDIRECT_FIELD_NAME, url=None):
-    actual_decorator = user_passes_test(
-        lambda u: (u.is_authenticated if settings.MB_AUTH else True),
-        login_url=reverse_lazy(url),
-        redirect_field_name=redirect_field_name
-    )
-    if function:
-        return actual_decorator(function)
-    return actual_decorator
-
-def mb_processor(request):
-    args={}
-    args['mb_auth']=settings.MB_AUTH
-    return args
-
-def home(request):
+def Home(request):
     args={}
     args['meetings'] = Meeting.objects.filter(meet_date__gte=timezone.now()). \
                            annotate(complete=F('check__complete'),
@@ -143,7 +125,11 @@ def members_update(request):
             if rowOrder and meet_id:
                 rowOrder = map(int, rowOrder.split(',')) if rowOrder else None;
                 for index, ordern in enumerate(rowOrder):
-                    id = request.POST.get('membersTable_id_{}'.format(ordern),0)
+                    try:
+                        id = int(request.POST.get('membersTable_id_{}'.format(ordern),0))
+                    except:
+                        id = 0
+
                     dep = request.POST.get('membersTable_dep_{}'.format(ordern),'')
                     f = request.POST.get('membersTable_f_{}'.format(ordern),'')
                     i= request.POST.get('membersTable_i_{}'.format(ordern),'')
@@ -156,15 +142,17 @@ def members_update(request):
                     is_presence = request.POST.get('membersTable_is_presence_{}'.format(ordern), 0)
 
                     if id:
+                        #print('Update')
                         Member.objects.filter(id=id).update(dep=dep, f=f, i=i, o=o, dol=dol, fio = fio,
                                               is_speaker=is_speaker, is_lead=is_lead, is_init=is_init,
                                               meeting_id=meet_id, order_n=index, is_presence=is_presence)
                     else:
+                        #print('Create')
                         id=Member.objects.create(dep=dep, f=f, i=i, o=o, dol=dol, fio = fio,
-                                              is_speaker=is_speaker, is_lead=is_lead, is_init=is_init,
-                                              meeting_id=meet_id, order_n=index, is_presence=is_presence).id
+                                                 is_speaker=is_speaker, is_lead=is_lead, is_init=is_init,
+                                                 meeting_id=meet_id, order_n=index, is_presence=is_presence).id
                     id_list.append(id)
-                    # print(id, dep, f, i, o, dol, is_speaker, fio,meet_id, index)
+                    #print(id, dep, f, i, o, dol, is_speaker, fio,meet_id, index)
 
             Member.objects.filter(meeting_id=meet_id).exclude(id__in=id_list).delete()
 
@@ -176,7 +164,7 @@ def members_update(request):
 @mb_login(url='login')
 def members_get(request, meet_id=None):
     if request.is_ajax():
-        members = Member.objects.filter(meeting__id=int(meet_id) if meet_id else 0).values()
+        members = Member.objects.filter(meeting__id=int(meet_id) if meet_id else 0).order_by('order_n').values()
         #data = serializers.serialize('json', list(members), fields=('dep','f','i','o','dol','is_speaker','Id'))
         data = json.dumps([dict(item) for item in members])
         return HttpResponse(data,'json')
@@ -230,6 +218,7 @@ def items_update(request):
     res = 1
     if request.method == 'POST':
         if request.POST:
+            print(request.POST)
             res = 0
             id_list = []
             meet_id = int(request.POST.get('meet_id',0))
@@ -237,7 +226,10 @@ def items_update(request):
             if rowOrder and meet_id:
                 rowOrder = map(int, rowOrder.split(',')) if rowOrder else None;
                 for index, ordern in enumerate(rowOrder):
-                    id = request.POST.get('itemsTable_id_{}'.format(ordern),0)
+                    try:
+                        id = int(request.POST.get('itemsTable_id_{}'.format(ordern),0))
+                    except:
+                        id = 0
                     dep = request.POST.get('itemsTable_dep_{}'.format(ordern),'')
                     f = request.POST.get('itemsTable_f_{}'.format(ordern),'')
                     i= request.POST.get('itemsTable_i_{}'.format(ordern),'')
@@ -247,7 +239,7 @@ def items_update(request):
                     item_subj = request.POST.get('itemsTable_item_subj_{}'.format(ordern), 0)
 
                     if id:
-                        Item.objects.update(id=id, dep=dep, f=f, i=i, o=o, dol=dol, item_time=item_time, item_subj = item_subj,
+                        Item.objects.filter(id=id).update(dep=dep, f=f, i=i, o=o, dol=dol, item_time=item_time, item_subj = item_subj,
                                               meeting_id=meet_id, order_n=index)
                     else:
                         id=Item.objects.create(dep=dep, f=f, i=i, o=o, dol=dol, item_time=item_time, item_subj = item_subj,
@@ -328,14 +320,19 @@ def studios_update(request):
             id_list = []
             meet_id = int(request.POST.get('meet_id', 0))
             rowOrder = request.POST.get('studiosTable_rowOrder', None)
-            print('>>> {} {}'.format(meet_id, rowOrder))
+            #print('>>> {} {}'.format(meet_id, rowOrder))
             if rowOrder and meet_id:
                 rowOrder = map(int, rowOrder.split(',')) if rowOrder else None;
                 for index, ordern in enumerate(rowOrder):
-                    id = int(request.POST.get('studiosTable_id_{}'.format(ordern), 0))
+                    try:
+                        id = int(request.POST.get('studiosTable_id_{}'.format(ordern),0))
+                    except:
+                        id = 0
+
                     studio_id = int(request.POST.get('studiosTable_studio_id_{}'.format(ordern), 0))
+
                     if id:
-                        StudioList.objects.update(id=id, studio_id=studio_id, meeting_id=meet_id, order_n=index)
+                        StudioList.objects.filter(id=id).update(studio_id=studio_id, meeting_id=meet_id, order_n=index)
                     else:
                         id = StudioList.objects.create(studio_id=studio_id, meeting_id=meet_id, order_n=index).id
                     id_list.append(id)
@@ -509,7 +506,7 @@ def checks_update(request, meet_id=None):
     if members:
         checks_json['p_members'] = 'on'
         args['members'] = members
-        args['is_presence'] = members.filter(is_presence=1).count()
+        args['is_presence'] = members.filter(Q(is_presence=1) | Q(is_init=1)).count()
     if items:
         checks_json['p_items'] = 'on'
         args['items'] = items
@@ -521,42 +518,3 @@ def checks_update(request, meet_id=None):
     args['meeting_type_choices'] = MEETING_TYPE_CHOICES
 
     return render(request,'mt_check.html', args)
-
-def loginView(request):
-    args = {}
-    args.update(csrf(request))
-    try:
-        username = request.POST['username']
-        password = request.POST['password']
-    except KeyError:
-        return render(request, 'mb_login.html', args)
-
-    next_url = request.GET.get('next', reverse("home"))
-
-    user = authenticate(username=username, password=password)
-    if user is not None:
-        if user.is_active:
-            login(request, user)
-            return redirect(next_url)
-        else:
-            args['system_message'] = {'text': 'Ваш аккаунт не активирван!', 'type': 'alert-danger'}
-            return handler403(request, args)
-            # return render(request, 'sopds_login.html', args)
-    else:
-        args['system_message'] = {'text': 'Пользователь не существует, либо пароль неверен!', 'type': 'alert-danger'}
-        return handler403(request, args)
-        # return render(request, 'sopds_login.html', args)
-
-    return handler403(request, args)
-    # return render(request, 'sopds_login.html', args)
-
-@mb_login(url='login')
-def logoutView(request):
-    logout(request)
-    args = {}
-    return redirect(reverse('home'))
-
-def handler403(request, args):
-    response = render(request, 'mb_login.html', args)
-    response.status_code = 403
-    return response

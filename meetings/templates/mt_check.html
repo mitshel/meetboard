@@ -282,10 +282,10 @@
                   <td></td>
                   <td colspan="3">
                       {% for m in members %}
-                          {% if m.is_presence %}
+                          {% if m.is_presence or m.is_init %}
                               <div class="form-group form-check form-check-inline" style="margin-bottom:0;">
                                 <input type="checkbox" class="form-check-input" id="pr_{{ m.id }}" name="pr_{{ m.id }}">
-                                <label class="form-check-label" for="pr_{{ m.id }}">{{ m.fio }}</label>
+                                <label class="form-check-label" for="pr_{{ m.id }}">{{ m.fio }} {% if m.is_init %}(инициатор){% endif %}</label>
                               </div>
                           {% endif %}
                       {% endfor %}

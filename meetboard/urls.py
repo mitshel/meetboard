@@ -18,13 +18,15 @@ from django.urls import path
 from django.conf.urls import url, include
 from django.conf import settings
 
-from meetings import views
+from mb_auth.views import loginView, logoutView
+from meetings.views import Home
 
 
 urlpatterns = [
-    path('', views.home, name='home'),
-    path('login/', views.loginView, name='login'),
-    path('logout/', views.logoutView, name='logout'),
+    path('', Home, name='home'),
+    path('login/', loginView, name='login'),
+    path('logout/', logoutView, name='logout'),
     path('meet/', include(('meetings.urls', 'meetings'), namespace='meetings')),
+    path('proto/', include(('protocols.urls', 'protocols'), namespace='protocols')),
     path('admin/', admin.site.urls, name='admin'),
 ]

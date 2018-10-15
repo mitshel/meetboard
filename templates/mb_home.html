@@ -3,12 +3,14 @@
 
 {% block main-content %}
       <!-- Main jumbotron for a primary marketing message or call to action -->
-      <div class="jumbotron">
+      <div class="jumbotron" style="padding: 1rem;">
         <div class="container">
-          <h1 class="display-5">Система планирования совещаний</h1>
+          <h2 class="display-6">Система планирования совещаний и оформления протоколов</h2>
           <p>Система планирования совещаний поможет Вам организовать совещание шаг за шагом, оформить все необходимые документы и выполнить рассылку участникам совещаний.</p>
+          <p>Система оформления протоколов поможет Вам быстро и безошибочно оформить любой протокол.</p>
           <hr class="my-4">
-          <a class="btn btn-primary btn-lg" href="{% url 'meetings:table' %}" role="button">Начать работу &raquo;</a>
+          <a class="btn btn-primary btn-lg" href="{% url 'meetings:table' %}" role="button">Начать работу с совещаниями &raquo;</a> &nbsp;&nbsp;
+          <a class="btn btn-primary btn-lg" href="{% url 'protocols:table' %}" role="button">Начать работу с протоколами &raquo;</a>
         </div>
       </div>
 {% endblock %}  {# content #}
