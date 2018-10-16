@@ -8,7 +8,6 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.db.models import Count, F, Q
-from django.contrib.staticfiles.views import serve
 from django.utils import timezone
 
 from mb_auth.views import mb_login
@@ -231,7 +230,6 @@ def items_update(request):
     res = 1
     if request.method == 'POST':
         if request.POST:
-            print(request.POST)
             res = 0
             id_list = []
             meet_id = int(request.POST.get('meet_id',0))
@@ -258,7 +256,7 @@ def items_update(request):
                         id=Item.objects.create(dep=dep, f=f, i=i, o=o, dol=dol, item_time=item_time, item_subj = item_subj,
                                               meeting_id=meet_id, order_n=index).id
                     id_list.append(id)
-                    print(id, dep, f, i, o, dol, item_time, item_subj, meet_id, index)
+                    #print(id, dep, f, i, o, dol, item_time, item_subj, meet_id, index)
 
             Item.objects.filter(meeting_id=meet_id).exclude(id__in=id_list).delete()
 

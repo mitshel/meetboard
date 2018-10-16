@@ -1,6 +1,14 @@
 from django.db import models
 from django.utils import timezone
 
+pSplit = 1
+pItem = 0
+
+DECISIONS_TYPE_CHOICES = (
+    (pItem, 'Пункт'),
+    (pSplit,'Разделитель'),
+)
+
 # Create your models here.
 class Protocol(models.Model):
     proto_header = models.CharField(max_length=256)
@@ -22,11 +30,13 @@ class Protocol(models.Model):
 
 class Decision(models.Model):
     protocol = models.ForeignKey('Protocol', on_delete=models.CASCADE)
-    dec_type = models.IntegerField(default=0)
+    dec_type = models.IntegerField(choices=DECISIONS_TYPE_CHOICES, default=pSplit)
     dec_text = models.TextField(blank=True)
-    dec_date = models.DateField(db_index=True)
-    dec_always = models.IntegerField(default=0)
-    dec_dep = models.CharField(max_length=64, blank=True)
+    ##dec_date = models.DateField(db_index=True)
+    ##dec_always = models.IntegerField(default=0)
+    ##dec_dep = models.CharField(max_length=64, blank=True)
+    dec_term = models.CharField(max_length=20, blank=True)
     dec_performers = models.CharField(max_length=256, blank=True)
     dec_progress = models.IntegerField(default=0)
     dec_comment = models.TextField(blank=True)
+    order_n = models.PositiveIntegerField(null=False, default=0)

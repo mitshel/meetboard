@@ -8,5 +8,7 @@ urlpatterns = [
     path('delete/<str:proto_id>/', views.proto_delete, name='delete'),
     path('update/<str:proto_id>/', views.proto_update, name='update'),
     path('copy/<str:proto_id>/', views.proto_copy, name='copy'),
+    path('decsupd/', views.decisions_update, name='decsupd'),
+    path('decsget/<str:proto_id>/', views.decisions_get, name='decsget'),
     path('check/<str:proto_id>/', views.proto_check, name='check'),
 ]

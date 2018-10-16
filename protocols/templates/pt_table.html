@@ -37,6 +37,35 @@
     </div>
 
     <!-- ------------------------------------------- -->
+    <!-- decsModal  -------------------------------- -->
+    <!-- ------------------------------------------- -->
+    <div class="modal decs-modal-lg" tabindex="-1" role="dialog" id="decsModal" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+              <span class="modal-title">Решения в протокол</span>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+          <div class="modal-body mx-auto">
+              <form action="{% url 'protocols:decsupd' %}" method="post" id="decisions_form">
+              {% csrf_token %}
+              <table id="decisionsTable"> </table>
+              <input type="hidden" name="proto_id" value="0" id="proto_id"/>
+              <br>
+              </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal" id="decsSave">Сохранить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------- -->
     <!-- protocolTable          ------------------------ -->
     <!-- ------------------------------------------- -->
     <table class="table table-sm table-hover display w-100" width="100%" id="protoTable">
@@ -46,6 +75,7 @@
           <th scope="col">Дата</th>
           <th scope="col">Номер</th>
           <th scope="col">Название</th>
+          <th scope="col">Решения</th>
         </tr>
       </thead>
       <tbody>
@@ -64,6 +94,9 @@
           <td>{{ p.proto_regdate | date:"d.m.Y" }}</td>
           <td {% if p.proto_regnum == '' %}class="table-warning"{% endif %}>{{ p.proto_regnum }}</td>
           <td {% if p.proto_header == '' %}class="table-warning"{% endif %}>{{ p.proto_header }}</td>
+          <td {% if p.decs_cnt == 0 %}class="table-warning"{% endif %}>
+              <a href="#" data-toggle="modal" data-target=".decs-modal-lg" data-proto="{{ p.id }}" data-header="{{ p.proto_header }}" data-dt="{{ p.proto_regdate }}">Решения</a>
+           </td>
         </tr>
       {% endfor %}
       </tbody>
@@ -107,5 +140,101 @@ $(document).ready( function () {
         });
 } );
 
+////////////////////////////////////////////////////////////////
+// decsModal Settings and Functions
+//
+$('#decsModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var proto = button.data('proto'); // Extract info from data-* attributes
+    var header = button.data('header'); // Extract info from data-* attributes
+    var dt = button.data('dt'); // Extract info from data-* attributes
+
+    var modal = $('#decsModal');
+    modal.find('.modal-title').html('Повестка совещания: <b>"' + header + '"</b><br>Дата совещания: <b>'+dt+'</b>');
+    $('#proto_id').attr('value',proto);
+
+    // Удаляем все данные таблицы
+    while ($('#decisionsTable').appendGrid('getRowCount')>0)  {
+      $('#decisionsTable').appendGrid('removeRow', 0);
+    };
+
+    // Загружаем данные из БД
+    var request = $.ajax({
+        url: "{% url 'protocols:decsget' -1 %}".replace('-1', proto),
+        type: "POST",
+        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+        dataType: "json",
+        success: function(msg) {
+            $('#decisionsTable').appendGrid('load', msg);
+        }
+    });
+
+});
+
+$(function () {
+    $('#decisionsTable').appendGrid({caption: 'Решения в протокол',
+        initRows: 0,
+        columns: [
+            { name: 'dec_type', display: 'Тип', type: 'select', ctrlOptions:
+                    { {% for t in dec_type_choices %}'{{ t.0 }}':'{{ t.1 }}',{% endfor %} } },
+            { name: 'dec_performers', display: 'Исполнители', type: 'text', ctrlAttr: { maxlength: 256 } },
+            { name: 'dec_term', display: 'Срок', type: 'text', ctrlAttr: { maxlength: 20} },
+            { name: 'id', type: 'hidden', value: 0 },
+        ],
+        //customRowButtons: [
+        //      { uiButton: { icon: 'ui-icon-person', showLabel: false }, click: selectEmployee, btnCss: { 'min-width': '30px' }, btnAttr: { title: 'Выбрать сотрудника' }, atTheFront: true },
+        //],
+        hideButtons: { insert: true },
+        i18n: {
+            append: 'Добавить запись',
+            removeLast: 'Удалить последнюю запись',
+            insert: 'Вставить запись',
+            remove: 'Удалить запись',
+            moveUp: 'Вверх',
+            moveDown: 'Вниз',
+        },
+        useSubPanel: true,
+        subPanelBuilder: function (cell, uniqueIndex) {
+            // Create a label
+            $('<span></span>').text('Решение: ').appendTo(cell);
+            // Create a text area
+            $('<textarea></textarea>').css('vertical-align', 'middle').attr({
+                id: 'decisionsTable_dec_text_' + uniqueIndex,
+                name: 'decisionsTable_dec_text_' + uniqueIndex,
+                rows: 1, cols: 140
+            }).appendTo(cell);
+        },
+        subPanelGetter: function (uniqueIndex) {
+            // Return the element value inside sub panel for `getAllValue` and `getRowValue` methods
+            return { 'dec_text': $('#decisionsTable_dec_text_' + uniqueIndex).val() };
+        },
+        rowDataLoaded: function (caller, record, rowIndex, uniqueIndex) {
+            // Check the record contains `item_subj`
+            if (record.dec_text) {
+                // Get the control in sub panel
+                var elem = document.getElementById('decisionsTable_dec_text_' + uniqueIndex);
+                // Fill the comment values in the sub panel
+                elem.value = record.dec_text;
+            }
+        }
+    });
+
+    // Handle `Save` button click
+    $('#decsSave').button().click(function () {
+        msg = $(document.forms[0]).serialize();
+        action_url = $('#decisions_form').attr("action");
+
+        $.ajax({
+            type: 'POST',
+            url: action_url,
+            data: msg,
+            success: function (data) {},
+            error: function (xhr, str) {}
+        });
+
+        $('#decsModal').modal('hide');
+        return false;
+    });
+});
 </script>
 {% endblock %}
