@@ -53,31 +53,42 @@ def meet_update(request, meet_id=None):
     if request.method == 'POST':
         if request.POST:
             meet_type = request.POST.get('meetType')
-            #meet_place = request.POST.get('meetPlace','')
             meet_subj = request.POST.get('meetSubj')
-            #meet_lead = request.POST.get('meetLead')
             meet_date = request.POST.get('meetDate')
             meet_date = datetime.datetime.strptime(meet_date, '%d.%m.%Y').date()
             meet_start = request.POST.get('meetStart')
             meet_end = request.POST.get('meetEnd')
-            #meet_init = request.POST.get('meetInit')
             meet_acc = request.POST.get('meetAcc')
             meet_tel = request.POST.get('meetTel')
             meet_save = (request.POST.get('meetSave','0') == '1')
             meet_confident = (request.POST.get('meetConfident') == '1')
+
+            # Если произошло копирование совещания, то omt_id содержит ID старого совещания
+            try:
+                omt_id = request.POST.get('omt_id',0)
+            except:
+                omt_id=0
 
             if meet_id:
                 Meeting.objects.filter(id=meet_id).update(meet_type=meet_type,meet_subj=meet_subj,
                                        meet_date=meet_date, meet_start=meet_start, meet_end=meet_end,
                                        meet_acc=meet_acc, meet_tel=meet_tel, meet_save=meet_save, meet_confident=meet_confident)
             else:
-                Meeting.objects.create(meet_type=meet_type,meet_subj=meet_subj,
+                meet_id=Meeting.objects.create(meet_type=meet_type,meet_subj=meet_subj,
                                        meet_date=meet_date, meet_start=meet_start, meet_end=meet_end,
-                                       meet_acc=meet_acc, meet_tel=meet_tel, meet_save=meet_save, meet_confident=meet_confident)
+                                       meet_acc=meet_acc, meet_tel=meet_tel, meet_save=meet_save, meet_confident=meet_confident).id
+                if omt_id:
+                    #print('start bulk copy from id={} to id={}'.format(omt_id, meet_id))
+                    old_members = Member.objects.filter(meeting_id=omt_id)
+                    old_items = Item.objects.filter(meeting_id=omt_id)
+                    old_studios = StudioList.objects.filter(meeting_id=omt_id)
+                    Member.objects.bulk_create([Member(order_n=i.order_n, f=i.f,i=i.i,o=i.o,dep=i.dep,dol=i.dol,fio=i.fio,
+                                                       is_speaker=i.is_speaker, is_presence=i.is_presence, is_init=i.is_init,
+                                                       is_lead=i.is_lead, meeting_id=meet_id) for i in old_members])
+                    Item.objects.bulk_create([Item(order_n=i.order_n, f=i.f,i=i.i,o=i.o,dep=i.dep,dol=i.dol,
+                                                   item_subj=i.item_subj, item_time=i.item_time, meeting_id=meet_id) for i in old_items])
+                    StudioList.objects.bulk_create([StudioList(order_n=i.order_n, meeting_id=meet_id, studio_id=i.studio_id) for i in old_studios])
 
-            # args['meetings'] = Meeting.objects.all().order_by('-meet_date', '-meet_start')
-            # return render(request,'mt_table.html', args)
-            #return meet_table(request)
             return redirect(reverse("meetings:table"))
 
     if meet_id:
@@ -107,6 +118,7 @@ def meet_copy(request, meet_id=None):
         except Meeting.DoesNotExist:
             omt = None
 
+    args['employees'] = Employee.objects.all().order_by('f', 'i', 'o').values('f', 'i', 'o', 'tel')
     args['meet']=omt
     args['meet_id'] = None
     args['meeting_type_choices'] = MEETING_TYPE_CHOICES
