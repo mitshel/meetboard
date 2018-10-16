@@ -15,6 +15,7 @@ from mb_auth.views import mb_login
 
 from meetings.models import MEETING_TYPE_CHOICES, Meeting, Dep, Member, Item, Studio, StudioList, Employee, Check
 
+@mb_login(url='login')
 def Home(request):
     args={}
     args['meetings'] = Meeting.objects.filter(meet_date__gte=timezone.now()). \
@@ -181,7 +182,7 @@ def members_doc(request, meet_id=None):
     if meeting:
         members = Member.objects.filter(meeting__id=int(meet_id) if meet_id else 0).order_by('order_n')
 
-        deplist = [];  d = None
+        deplist = [];  d = None; ml = [];
         for m in members:
             if (m.dep != d):
                 if d: deplist.append({'name': d, 'members': ml})

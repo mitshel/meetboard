@@ -4,7 +4,7 @@
 
 <Workspace>
 	<Local Expanded="Yes">
-		<Model Expanded="Yes" ID="{26758A9F-00E3-4B74-84D0-B4DCF76C3961}" Name="Physical Data _1" Selected="Yes" Type="{CDE44E21-9669-11D1-9914-006097355D9B}" URL="../../meetboard/meetboard.pdm"/>
+		<Model Expanded="Yes" ID="{07970B25-5C0D-4AD6-ABB4-F84868E40566}" Name="Physical Data _1" Selected="Yes" Type="{CDE44E21-9669-11D1-9914-006097355D9B}" URL="Physical Data _1.pdm"/>
 	</Local>
 	<BrowserModule Name="Repository"/>
 </Workspace>

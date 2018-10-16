@@ -110,7 +110,7 @@
 
           <div class="modal-body">
                  <label for="inputEmployee">Введите фамилию для поиска сотрудника:</label>
-                 <input class="typeahead form-control" type="text" data-provide="typeahead" data-items="8" id="inputEmployee">
+                 <input class="typeahead form-control" type="text" data-provide="typeahead" data-items="8" id="inputEmployee" autocomplete="off">
                  <br>
                  <div class="row">
                      <div class="col-4">
@@ -303,7 +303,7 @@ $(function () {
     $('#membersTable').appendGrid({caption: 'Участники совещания',
         initRows: 0,
         rowDragging: true,
-        hideButtons: { moveUp: true, moveDown: true },
+        hideButtons: { moveUp: true, moveDown: true, insert: true },
         columns: [
             { name: 'dep', display: 'Организация', ctrlCss: { width: '250px'}, type: 'select', ctrlOptions:
                     [
@@ -431,6 +431,7 @@ $(function () {
         customRowButtons: [
               { uiButton: { icon: 'ui-icon-person', showLabel: false }, click: selectEmployee, btnCss: { 'min-width': '30px' }, btnAttr: { title: 'Выбрать сотрудника' }, atTheFront: true },
         ],
+        hideButtons: { insert: true },
         i18n: {
             append: 'Добавить запись',
             removeLast: 'Удалить последнюю запись',
@@ -486,7 +487,11 @@ $(function () {
 var $inputEmployee = $("#inputEmployee");
 
 function selectEmployee(evtObj, uniqueIndex, rowData) {
-    $inputEmployee.val(rowData.f + ' '+rowData.i+' '+rowData.o);
+    if (rowData.f) {
+        $inputEmployee.val(rowData.f + ' ' + rowData.i + ' ' + rowData.o);
+    } else {
+        $inputEmployee.val('');
+    };
     $("#employeeF").val(rowData.f)
     $("#employeeI").val(rowData.i)
     $("#employeeO").val(rowData.o)
