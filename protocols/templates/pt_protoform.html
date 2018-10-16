@@ -1,0 +1,128 @@
+{% extends "mb_main.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+<div class="container">
+
+<h1 class="display-5">{% if proto_id %}Изменить{% else %}Новый{% endif %} протокол.</h1>
+
+<form action="{% url 'protocols:update' proto_id %}" method="post">
+    {% csrf_token %}
+
+    <div class="form-row">
+      <div class="form-group col-md-3">
+            <label for="proto_regdate">Дата регистрации:</label>
+            <input type="text" class="form-control form-control-sm" id="proto_regdate" name="proto_regdate" data-date-format="dd.mm.yyyy" data-provide="datepicker" value="{{ proto.proto_regdate | date:"d.m.Y" }}" required>
+            <div class="invalid-feedback">Пожалуйста, введите дату протокола.</div>
+      </div>
+      <div class="form-group col-md-3">
+        <label for="proto_regnum">Рег.№:</label>
+        <input type="text" class="form-control form-control-sm" id="proto_regnum" name="proto_regnum" value="{{ proto.proto_regnum }}">
+      </div>
+      <div class="form-group col-md-3">
+        <label for="proto_place">Адрес (город):</label>
+        <input type="text" class="form-control form-control-sm" id="proto_place" name="proto_place" value="{{ proto.proto_place }}">
+      </div>
+      <div class="form-group col-md-3">
+        <label for="proto_date">Дата протокола:</label>
+        <input type="text" class="form-control form-control-sm" id="proto_date" name="proto_date" value="{{ proto.proto_date }}">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-12">
+        <label for="proto_header">Название протокола:</label>
+        <textarea rows="2"  type="text" class="form-control form-control-sm" id="proto_header" name="proto_header" placeholder="Введите наименование протокола" required>{{ proto.proto_header }}</textarea>
+        <div class="invalid-feedback">Пожалуйста, введите наименование протокола.</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-12">
+        <label for="proto_preambula">Преамбула протокола:</label>
+        <textarea rows="3" class="form-control form-control-sm" id="proto_preambula" name="proto_preambula" placeholder="Введите преамбулу">{{ proto.proto_preambula }}</textarea>
+        <div class="invalid-feedback">Пожалуйста, введите преамбулу.</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-12">
+        <label for="proto_fabula">Основной текст протокола:</label>
+        <textarea rows="3" class="form-control form-control-sm" id="proto_fabula" name="proto_fabula" placeholder="Введите основной текст протокола">{{ proto.proto_fabula }}</textarea>
+        <div class="invalid-feedback">Пожалуйста, введите наименование протокола.</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group col-md-4">
+        <label for="proto_fio">Подпись:</label>
+        <input type="text" class="typeahead form-control form-control-sm" id="proto_fio" name="proto_fio" data-provide="typeahead" data-items="8" placeholder="Сидоров А.В." value="{{ proto.proto_fio }}" autocomplete="off">
+      </div>
+      <div class="form-group col-md-4">
+        <label for="proto_dol">Должность:</label>
+        <input type="text" class="form-control form-control-sm" id="proto_dol" name="proto_dol" placeholder="" value="{{ proto.proto_dol }}">
+      </div>
+      <div class="form-group col-md-4"></div>
+    </div>
+
+    <br>
+    <input type="hidden" id="opt_id" name="opt_id" value="{{ proto.id }}">
+    <button type="submit" class="btn btn-primary"> {% if proto %}Сохранить{% else %}Создать{% endif %} протокол </button>
+    <a role="button" class="btn btn-secondary" href="{% url 'protocols:table' %}" > Отмена </a>
+</form>
+</div>
+{% endblock %}  {# content #}
+
+{% block js-block %}
+<script src="{% static "js/bootstrap-datepicker.min.js" %}"></script>
+<script src="{% static "js/bootstrap-datepicker.ru.min.js" %}"></script>
+<script src="{% static "js/bootstrap-timepicker.min.js" %}"></script>
+<script type="text/javascript">
+
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function() {
+      'use strict';
+      window.addEventListener('load', function() {
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.getElementsByClassName('needs-validation');
+        // Loop over them and prevent submission
+        var validation = Array.prototype.filter.call(forms, function(form) {
+          form.addEventListener('submit', function(event) {
+            if (form.checkValidity() === false) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+          }, false);
+        });
+      }, false);
+    })();
+
+    $('#proto_regdate').datepicker({
+        weekStart: 1,
+        daysOfWeekHighlighted: "6,0",
+        autoclose: true,
+        todayHighlight: true,
+        language: "ru",
+    });
+
+var $inputEmployee = $("#proto_fio");
+
+$inputEmployee.typeahead({
+  source: [
+          {% for e in employees %}{name:"{{ e.f }} {{ e.i }} {{ e.o }}",id:"{{ e.id }}", f:"{{ e.f }}", i:"{{ e.i }}", o:"{{ e.o }}", dol:"{{ e.dol }}"}{% if not forloop.last %},{% endif %}{% endfor %}
+  ],
+  autoSelect: true
+});
+
+$inputEmployee.change(function() {
+  var current = $inputEmployee.typeahead("getActive");
+  if (current) {
+      // Some item from your model is active!
+      $("#proto_fio").val(current.f + ' ' + current.i.substr(0, 1) + '.' + current.o.substr(0, 1) + '.');
+      $("#proto_dol").val(current.dol);
+  }
+});
+</script>
+{% endblock %}  {# js-block #}

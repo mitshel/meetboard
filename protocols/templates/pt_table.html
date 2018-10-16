@@ -52,7 +52,7 @@
       {% for p in protocols %}
         <tr>
           <th scope="row">
-              <a href="#" data-toggle="tooltip" data-placement="top" title="Удалить протокол" onClick="$('#protocolDeleteButton').attr('href','{% url 'protocols:delete' m.id %}');$('#protocolDeleteModal').find('div.modal-body').find('span').text('{{ p.proto_header }}');$('#protocolDeleteModal').modal('show');"><i class="fa fa-trash"></i></a>
+              <a href="#" data-toggle="tooltip" data-placement="top" title="Удалить протокол" onClick="$('#protocolDeleteButton').attr('href','{% url 'protocols:delete' p.id %}');$('#protocolDeleteModal').find('div.modal-body').find('span').text('{{ p.proto_header }}');$('#protocolDeleteModal').modal('show');"><i class="fa fa-trash"></i></a>
               <a href="{% url 'protocols:update' p.id %}" data-toggle="tooltip" data-placement="top" title="Изменить данные"><i class="fa fa-edit"></i></a>
               <a href="{% url 'protocols:copy' p.id %}" data-toggle="tooltip" data-placement="top" title="Скопировать"><i class="fa fa-copy"></i></a>
               <a href="{% url 'protocols:check' p.id %}" data-toggle="tooltip" data-placement="top" title="Контроль"><!--<i class="fa fa-check-square"></i>-->

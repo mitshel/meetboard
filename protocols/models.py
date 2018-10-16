@@ -28,3 +28,5 @@ class Decision(models.Model):
     dec_always = models.IntegerField(default=0)
     dec_dep = models.CharField(max_length=64, blank=True)
     dec_performers = models.CharField(max_length=256, blank=True)
+    dec_progress = models.IntegerField(default=0)
+    dec_comment = models.TextField(blank=True)
