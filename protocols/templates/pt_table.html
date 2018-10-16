@@ -1,0 +1,111 @@
+{% extends "mb_main.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+    <div class="row">
+    <div class="col-sm-12">
+        <div class="btn-group" role="group" aria-label="meetings menu">
+              <a type="button" class="btn btn-primary" href="{% url 'protocols:add' %}"><i class="fa fa-plus"></i> Создать протокол </a>
+        </div>
+    </div>
+    </div>
+
+    <br>
+
+    <!-- ------------------------------------------- -->
+    <!-- protocolDeleteModal ------------------------ -->
+    <!-- ------------------------------------------- -->
+    <div class="modal" id="protocolDeleteModal" tabindex="-1" role="dialog" aria-labelledby="protocolDeleteModalTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="protocolDeleteModalTitle">Удаление протокола</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+               Вы действительно хотите удалить протокол <b>"<span></span>"</b>?
+          </div>
+          <div class="modal-footer">
+            <a type="button" class="btn btn-secondary" data-dismiss="modal" href="#">Выйти без удаления</a>
+            <a type="button" class="btn btn-primary" href="#" id="protocolDeleteButton">Удалить протокол</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------- -->
+    <!-- protocolTable          ------------------------ -->
+    <!-- ------------------------------------------- -->
+    <table class="table table-sm table-hover display w-100" width="100%" id="protoTable">
+      <thead>
+        <tr>
+          <th scope="col">Действия</th>
+          <th scope="col">Дата</th>
+          <th scope="col">Номер</th>
+          <th scope="col">Название</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for p in protocols %}
+        <tr>
+          <th scope="row">
+              <a href="#" data-toggle="tooltip" data-placement="top" title="Удалить протокол" onClick="$('#protocolDeleteButton').attr('href','{% url 'protocols:delete' m.id %}');$('#protocolDeleteModal').find('div.modal-body').find('span').text('{{ p.proto_header }}');$('#protocolDeleteModal').modal('show');"><i class="fa fa-trash"></i></a>
+              <a href="{% url 'protocols:update' p.id %}" data-toggle="tooltip" data-placement="top" title="Изменить данные"><i class="fa fa-edit"></i></a>
+              <a href="{% url 'protocols:copy' p.id %}" data-toggle="tooltip" data-placement="top" title="Скопировать"><i class="fa fa-copy"></i></a>
+              <a href="{% url 'protocols:check' p.id %}" data-toggle="tooltip" data-placement="top" title="Контроль"><!--<i class="fa fa-check-square"></i>-->
+              <div class="progress">
+                  <div class="progress-bar progress-bar-striped {% if p.progress < 50 %}bg-danger{% elif p.progress < 80 %}bg-warning{% elif p.progress < 100 %}bg-info{% else %}bg-success{% endif %}" role="progressbar" style="width: {{ p.progress }}%" aria-valuenow="{{ p.complete }}" aria-valuemin="0" aria-valuemax="{{ p.total }}">{% if p.complete %}{{ p.progress }}%{% endif %}</div>
+              </div>
+              </a>
+          </th>
+          <td>{{ p.proto_regdate | date:"d.m.Y" }}</td>
+          <td {% if p.proto_regnum == '' %}class="table-warning"{% endif %}>{{ p.proto_regnum }}</td>
+          <td {% if p.proto_header == '' %}class="table-warning"{% endif %}>{{ p.proto_header }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+{% endblock %}  {# content #}
+
+{% block js-block %}
+<script src="{% static "js/jquery.tabledit.min.js" %}"></script>
+<script type="text/javascript" src="{% static "appendGrid/jquery.appendGrid-1.7.1.min.js" %}"></script>
+<script type="text/javascript">
+
+////////////////////////////////////////////////////////////////
+// protocolTable Settings and Functions
+//
+$(document).ready( function () {
+
+    $('#protoTable').DataTable({
+            ordering:  false,
+            "language": {
+                          "processing": "Подождите...",
+                          "search": "Поиск:",
+                          "lengthMenu": "Показать _MENU_ записей",
+                          "info": "Записи с _START_ до _END_ из _TOTAL_ записей",
+                          "infoEmpty": "Записи с 0 до 0 из 0 записей",
+                          "infoFiltered": "(отфильтровано из _MAX_ записей)",
+                          "infoPostFix": "",
+                          "loadingRecords": "Загрузка записей...",
+                          "zeroRecords": "Записи отсутствуют.",
+                          "emptyTable": "В таблице отсутствуют данные",
+                          "paginate": {
+                            "first": "Первая",
+                            "previous": "Предыдущая",
+                            "next": "Следующая",
+                            "last": "Последняя"
+                          },
+                          "aria": {
+                            "sortAscending": ": активировать для сортировки столбца по возрастанию",
+                            "sortDescending": ": активировать для сортировки столбца по убыванию"
+                          }
+                        }
+        });
+} );
+
+</script>
+{% endblock %}
