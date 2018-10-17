@@ -1,15 +1,18 @@
 import datetime
 import json
+import os
 
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.db.models import Count, F, Q
 from django.template.context_processors import csrf
 from django.http import HttpResponse
+from django.utils import timezone
 
 from mb_auth.views import mb_login
 from protocols.models import DECISIONS_TYPE_CHOICES, Protocol, Decision
 from meetings.models import Employee
+from docxtpl import DocxTemplate
 
 # Create your views here.
 @mb_login(url='login')
@@ -104,7 +107,6 @@ def decisions_update(request):
     res = 1
     if request.method == 'POST':
         if request.POST:
-            print(request.POST)
             res = 0
             id_list = []
             proto_id = int(request.POST.get('proto_id',0))
@@ -118,7 +120,7 @@ def decisions_update(request):
                         id = 0
 
                     dec_performers = request.POST.get('decisionsTable_dec_performers_{}'.format(ordern),'')
-                    dec_type= request.POST.get('decisionsTable_dec_type_{}'.format(ordern),'')
+                    dec_type = request.POST.get('decisionsTable_dec_type_{}'.format(ordern),'')
                     dec_text = request.POST.get('decisionsTable_dec_text_{}'.format(ordern),'')
                     dec_term = request.POST.get('decisionsTable_dec_term_{}'.format(ordern), '')
 
@@ -132,12 +134,44 @@ def decisions_update(request):
                                                    protocol_id=proto_id).id
                     id_list.append(id)
 
-                    Decision.objects.filter(protocol_id=proto_id).exclude(id__in=id_list).delete()
+                Decision.objects.filter(protocol_id=proto_id).exclude(id__in=id_list).delete()
 
     response = HttpResponse()
     response['Content-Type'] = "text/javascript"
     response.write(json.dumps({'user':'admin','id':1,'result':res}))
     return response
+
+@mb_login(url='login')
+def proto_doc(request, proto_id=None):
+    proto_id = int(proto_id) if proto_id else 0
+    try:
+        protocol = Protocol.objects.get(id=proto_id)
+    except:
+        protocol = None
+
+    if protocol:
+        try: decisions = Decision.objects.filter(protocol__id=proto_id).order_by('order_n')
+        except: decisions = []
+
+        filename='protocol{}_{}.docx'.format(proto_id,timezone.now().strftime('%Y%m%d%H%M%S'))
+        fullname="media/{}".format(filename)
+        doc = DocxTemplate("media/protocol_tpl.docx")
+        context = {'protocol': protocol,
+                   'decisions': decisions}
+        doc.render(context)
+        doc.save(fullname)
+
+        f = open(fullname, "rb")
+        s = f.read()
+        response = HttpResponse()
+        response["Content-Type"] = '{}; name="{}"'.format('application/msword', filename)
+        response["Content-Disposition"] = 'attachment; filename="{}"'.format(filename)
+        response["Content-Transfer-Encoding"] = 'binary'
+        response["Content-Length"] = str(len(s))
+        response.write(s)
+        f.close()
+        os.remove(fullname)
+        return response
 
 @mb_login(url='login')
 def decisions_get(request, proto_id=None):

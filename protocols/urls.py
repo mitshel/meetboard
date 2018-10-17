@@ -10,5 +10,6 @@ urlpatterns = [
     path('copy/<str:proto_id>/', views.proto_copy, name='copy'),
     path('decsupd/', views.decisions_update, name='decsupd'),
     path('decsget/<str:proto_id>/', views.decisions_get, name='decsget'),
+    path('protodoc/<str:proto_id>/', views.proto_doc, name='doc'),
     path('check/<str:proto_id>/', views.proto_check, name='check'),
 ]

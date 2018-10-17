@@ -41,6 +41,8 @@
     <!-- ------------------------------------------- -->
     <div class="modal decs-modal-lg" tabindex="-1" role="dialog" id="decsModal" data-backdrop="static" data-keyboard="false">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <form action="{% url 'protocols:decsupd' %}" method="post" id="decisions_form">
+      {% csrf_token %}
         <div class="modal-content">
           <div class="modal-header">
               <span class="modal-title">Решения в протокол</span>
@@ -50,18 +52,16 @@
           </div>
 
           <div class="modal-body mx-auto">
-              <form action="{% url 'protocols:decsupd' %}" method="post" id="decisions_form">
-              {% csrf_token %}
               <table id="decisionsTable"> </table>
               <input type="hidden" name="proto_id" value="0" id="proto_id"/>
-              <br>
-              </form>
+              <ul class="invalid-feedback" id="ulError"></ul>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-            <button type="button" class="btn btn-primary" data-dismiss="modal" id="decsSave">Сохранить</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+              <button type="submit" class="btn btn-primary" id="decsSave">Сохранить</button>
           </div>
         </div>
+        </form>
       </div>
     </div>
 
@@ -85,6 +85,7 @@
               <a href="#" data-toggle="tooltip" data-placement="top" title="Удалить протокол" onClick="$('#protocolDeleteButton').attr('href','{% url 'protocols:delete' p.id %}');$('#protocolDeleteModal').find('div.modal-body').find('span').text('{{ p.proto_header }}');$('#protocolDeleteModal').modal('show');"><i class="fa fa-trash"></i></a>
               <a href="{% url 'protocols:update' p.id %}" data-toggle="tooltip" data-placement="top" title="Изменить данные"><i class="fa fa-edit"></i></a>
               <a href="{% url 'protocols:copy' p.id %}" data-toggle="tooltip" data-placement="top" title="Скопировать"><i class="fa fa-copy"></i></a>
+              <a href="{% url 'protocols:doc' p.id %}" data-toggle="tooltip" data-placement="top" title="Печать протокола"><i class="fa fa-print"></i></a>
               <a href="{% url 'protocols:check' p.id %}" data-toggle="tooltip" data-placement="top" title="Контроль"><!--<i class="fa fa-check-square"></i>-->
               <div class="progress">
                   <div class="progress-bar progress-bar-striped {% if p.progress < 50 %}bg-danger{% elif p.progress < 80 %}bg-warning{% elif p.progress < 100 %}bg-info{% else %}bg-success{% endif %}" role="progressbar" style="width: {{ p.progress }}%" aria-valuenow="{{ p.complete }}" aria-valuemin="0" aria-valuemax="{{ p.total }}">{% if p.complete %}{{ p.progress }}%{% endif %}</div>
@@ -104,8 +105,10 @@
 {% endblock %}  {# content #}
 
 {% block js-block %}
-<script src="{% static "js/jquery.tabledit.min.js" %}"></script>
+<script type="text/javascript" src="{% static "js/jquery.tabledit.min.js" %}"></script>
 <script type="text/javascript" src="{% static "appendGrid/jquery.appendGrid-1.7.1.min.js" %}"></script>
+<script type="text/javascript" src="{% static "js/jquery.validate.min.js" %}"></script>
+
 <script type="text/javascript">
 
 ////////////////////////////////////////////////////////////////
@@ -158,6 +161,9 @@ $('#decsModal').on('show.bs.modal', function (event) {
       $('#decisionsTable').appendGrid('removeRow', 0);
     };
 
+    // Очищаем информацию об ошибках
+    $('#ulError').html('');
+
     // Загружаем данные из БД
     var request = $.ajax({
         url: "{% url 'protocols:decsget' -1 %}".replace('-1', proto),
@@ -175,10 +181,13 @@ $(function () {
     $('#decisionsTable').appendGrid({caption: 'Решения в протокол',
         initRows: 0,
         columns: [
-            { name: 'dec_type', display: 'Тип', type: 'select', ctrlOptions:
-                    { {% for t in dec_type_choices %}'{{ t.0 }}':'{{ t.1 }}',{% endfor %} } },
-            { name: 'dec_performers', display: 'Исполнители', type: 'text', ctrlAttr: { maxlength: 256 } },
-            { name: 'dec_term', display: 'Срок', type: 'text', ctrlAttr: { maxlength: 20} },
+            { name: 'dec_type', display: 'Тип', type: 'select', ctrlClass: 'form-control form-control-sm', ctrlCss:{width:'120px'},
+              ctrlOptions: {
+                                {% for t in dec_type_choices %} {{ t.0 }} :'{{ t.1 }}' {% if not forloop.last %},{% endif %} {% endfor %}
+                            }
+            },
+            { name: 'dec_performers', display: 'Исполнители', type: 'text', ctrlClass: 'form-control form-control-sm', ctrlCss:{width:'600px'}, ctrlAttr: { maxlength: 256 } },
+            { name: 'dec_term', display: 'Срок', type: 'text', ctrlClass: 'form-control form-control-sm dec_term', ctrlCss:{width:'100px'}, ctrlAttr: { maxlength: 20} },
             { name: 'id', type: 'hidden', value: 0 },
         ],
         //customRowButtons: [
@@ -201,7 +210,8 @@ $(function () {
             $('<textarea></textarea>').css('vertical-align', 'middle').attr({
                 id: 'decisionsTable_dec_text_' + uniqueIndex,
                 name: 'decisionsTable_dec_text_' + uniqueIndex,
-                rows: 1, cols: 140
+                rows: 1, cols: 140,
+                class: 'form-control form-control-sm'
             }).appendTo(cell);
         },
         subPanelGetter: function (uniqueIndex) {
@@ -219,8 +229,11 @@ $(function () {
         }
     });
 
+    $('#decsSave').button();
     // Handle `Save` button click
-    $('#decsSave').button().click(function () {
+    //$('#decsSave').button().click(function () {
+
+    function decision_submit() {
         msg = $(document.forms[0]).serialize();
         action_url = $('#decisions_form').attr("action");
 
@@ -228,12 +241,29 @@ $(function () {
             type: 'POST',
             url: action_url,
             data: msg,
-            success: function (data) {},
-            error: function (xhr, str) {}
+            success: function (data) {
+            },
+            error: function (xhr, str) {
+            }
         });
 
         $('#decsModal').modal('hide');
-        return false;
+        return true;
+    };
+
+    $.validator.addMethod('dec_term', function (value, element) {
+        result_date = value.search(/^(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d$/) != -1 ;
+        result_text = value.search(/^\D*$/) != -1;
+        return result_date | result_text;
+    }, 'В поле "Срок" необходимо ввести Дату в формате "ДД.ММ.ГГГ" либо любое слово, например "постоянно","еженедельно" и т.д.');
+
+    // Initialize validation plugin
+    $(document.forms[0]).validate({
+        errorLabelContainer: '#ulError',
+        wrapper: 'li',
+        submitHandler: function () {
+            decision_submit();
+        }
     });
 });
 </script>
