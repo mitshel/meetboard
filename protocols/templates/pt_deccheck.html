@@ -37,8 +37,8 @@
       <td>{{ dec.dec_term }}</td>
       <td>
           <div class="form-group">
-            <input type="range" title="{{ dec.dec_progress }}%" class="form-control-range" value="{{ dec.dec_progress }}" id="dec_progress_{{ dec.id }}" name="dec_progress_{{ dec.id }}" onchange="$('#range_label_{{ dec.id }}').text($(this).val()+'%')">
-            <label style="text-align:center;" id="range_label_{{ dec.id }}" for="dec_progress_{{ dec.id }}">{{ dec.dec_progress }}%</label>
+            <input type="range" title="{{ dec.dec_progress }}%" class="form-control-range" value="{{ dec.dec_progress }}" id="dec_progress_{{ dec.id }}" name="dec_progress_{{ dec.id }}" onchange="$('#ldec_progress_{{ dec.id }}').text($(this).val()+'%')">
+            <label style="text-align:center;" id="ldec_progress_{{ dec.id }}" for="dec_progress_{{ dec.id }}">{{ dec.dec_progress }}%</label>
           </div>
       </td>
       <td>
@@ -59,8 +59,33 @@
 
 {% block js-block %}
 <script type="text/javascript">
-//    $('[id*="dec_progress_"]').each(function(i,elem) {
-//        elem.slider();
-//    });
+$(document).ready( function () {
+    $('#decTable').DataTable({
+            ordering:  true,
+            "language": {
+                          "processing": "Подождите...",
+                          "search": "Поиск:",
+                          "lengthMenu": "Показать _MENU_ записей",
+                          "info": "Записи с _START_ до _END_ из _TOTAL_ записей",
+                          "infoEmpty": "Записи с 0 до 0 из 0 записей",
+                          "infoFiltered": "(отфильтровано из _MAX_ записей)",
+                          "infoPostFix": "",
+                          "loadingRecords": "Загрузка записей...",
+                          "zeroRecords": "Записи отсутствуют.",
+                          "emptyTable": "В таблице отсутствуют данные",
+                          "paginate": {
+                            "first": "Первая",
+                            "previous": "Предыдущая",
+                            "next": "Следующая",
+                            "last": "Последняя"
+                          },
+                          "aria": {
+                            "sortAscending": ": активировать для сортировки столбца по возрастанию",
+                            "sortDescending": ": активировать для сортировки столбца по убыванию"
+                          }
+                        }
+        });
+} );
+
 </script>
 {% endblock %}  {# js-block #}

@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import re
 
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
@@ -124,15 +125,19 @@ def decisions_update(request):
                     dec_type = request.POST.get('decisionsTable_dec_type_{}'.format(ordern),'')
                     dec_text = request.POST.get('decisionsTable_dec_text_{}'.format(ordern),'')
                     dec_term = request.POST.get('decisionsTable_dec_term_{}'.format(ordern), '')
+                    try:
+                        dec_date = datetime.datetime.strptime(dec_term, "%d.%m.%Y").date()
+                    except:
+                        dec_date = None
 
                     if id:
                         Decision.objects.filter(id=id).update(dec_performers=dec_performers, dec_type=dec_type,
                                                               dec_text=dec_text, dec_term=dec_term, order_n=index,
-                                                              protocol_id=proto_id)
+                                                              protocol_id=proto_id, dec_date=dec_date)
                     else:
                         id=Decision.objects.create(dec_performers=dec_performers, dec_type=dec_type,
                                                    dec_text=dec_text, dec_term=dec_term, order_n=index,
-                                                   protocol_id=proto_id).id
+                                                   protocol_id=proto_id, dec_date=dec_date).id
                     id_list.append(id)
 
                 Decision.objects.filter(protocol_id=proto_id).exclude(id__in=id_list).delete()
