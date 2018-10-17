@@ -1,0 +1,66 @@
+{% extends "mb_main.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+
+    <h5>
+        Контроль протокола <b>"{{ proto.proto_header }}"</b><br>
+        №/Дата протокола: <b>{{ proto.proto_regnum }} от {{ proto.proto_regdate }}</b>
+    </h5>
+      <div class="progress fixed-bottom">
+          <div class="progress-bar progress-bar-striped" id="progressbar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+      </div>
+    <br>
+<!-- ------------------------------------------- -->
+<!-- decisionsTable          ------------------------ -->
+<!-- ------------------------------------------- -->
+<form action="{% url 'protocols:checkupd' %}" method="post">
+{% csrf_token %}
+<table class="table table-sm table-hover display w-100" width="100%" id="decTable">
+  <thead>
+    <tr>
+      <th scope="col">№</th>
+      <th scope="col">Поручение</th>
+      <th scope="col">Ответственный</th>
+      <th scope="col">Срок</th>
+      <th scope="col">Прогресс</th>
+      <th scope="col" width="30%">Комментарий</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for dec in decisions %}
+    <tr>
+      <td>{{ forloop.counter }}.</td>
+      <td>{{ dec.dec_text }}</td>
+      <td>{{ dec.dec_performers }}</td>
+      <td>{{ dec.dec_term }}</td>
+      <td>
+          <div class="form-group">
+            <input type="range" title="{{ dec.dec_progress }}%" class="form-control-range" value="{{ dec.dec_progress }}" id="dec_progress_{{ dec.id }}" name="dec_progress_{{ dec.id }}" onchange="$('#range_label_{{ dec.id }}').text($(this).val()+'%')">
+            <label style="text-align:center;" id="range_label_{{ dec.id }}" for="dec_progress_{{ dec.id }}">{{ dec.dec_progress }}%</label>
+          </div>
+      </td>
+      <td>
+          <div class="form-group">
+              <textarea class="form-control form-control-sm" id="dec_comment_{{ dec.id }}" name="dec_comment_{{ dec.id }}" rows="2">{{ dec.dec_comment }}</textarea>
+          </div>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+    <input type="hidden" name="rowOrder" value="{% for dec in decisions %}{{ dec.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <a role="button" class="btn btn-secondary" href="{% url 'protocols:table' %}" > Отмена </a>
+
+</form>
+{% endblock %}  {# content #}
+
+{% block js-block %}
+<script type="text/javascript">
+//    $('[id*="dec_progress_"]').each(function(i,elem) {
+//        elem.slider();
+//    });
+</script>
+{% endblock %}  {# js-block #}

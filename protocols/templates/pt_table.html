@@ -76,6 +76,7 @@
           <th scope="col">Номер</th>
           <th scope="col">Название</th>
           <th scope="col">Решения</th>
+          <th scope="col">Исполнение</th>
         </tr>
       </thead>
       <tbody>
@@ -86,11 +87,6 @@
               <a href="{% url 'protocols:update' p.id %}" data-toggle="tooltip" data-placement="top" title="Изменить данные"><i class="fa fa-edit"></i></a>
               <a href="{% url 'protocols:copy' p.id %}" data-toggle="tooltip" data-placement="top" title="Скопировать"><i class="fa fa-copy"></i></a>
               <a href="{% url 'protocols:doc' p.id %}" data-toggle="tooltip" data-placement="top" title="Печать протокола"><i class="fa fa-print"></i></a>
-              <a href="{% url 'protocols:check' p.id %}" data-toggle="tooltip" data-placement="top" title="Контроль"><!--<i class="fa fa-check-square"></i>-->
-              <div class="progress">
-                  <div class="progress-bar progress-bar-striped {% if p.progress < 50 %}bg-danger{% elif p.progress < 80 %}bg-warning{% elif p.progress < 100 %}bg-info{% else %}bg-success{% endif %}" role="progressbar" style="width: {{ p.progress }}%" aria-valuenow="{{ p.complete }}" aria-valuemin="0" aria-valuemax="{{ p.total }}">{% if p.complete %}{{ p.progress }}%{% endif %}</div>
-              </div>
-              </a>
           </th>
           <td>{{ p.proto_regdate | date:"d.m.Y" }}</td>
           <td {% if p.proto_regnum == '' %}class="table-warning"{% endif %}>{{ p.proto_regnum }}</td>
@@ -98,6 +94,13 @@
           <td {% if p.decs_cnt == 0 %}class="table-warning"{% endif %}>
               <a href="#" data-toggle="modal" data-target=".decs-modal-lg" data-proto="{{ p.id }}" data-header="{{ p.proto_header }}" data-dt="{{ p.proto_regdate }}">Решения</a>
            </td>
+        <td>
+              <a href="{% url 'protocols:check' p.id %}" data-toggle="tooltip" data-placement="top" title="Контроль"><!--<i class="fa fa-check-square"></i>-->
+              <div class="progress">
+                  <div class="progress-bar progress-bar-striped {% if p.progress < 50 %}bg-danger{% elif p.progress < 80 %}bg-warning{% elif p.progress < 100 %}bg-info{% else %}bg-success{% endif %}" role="progressbar" style="width: {{ p.progress|floatformat:'0' }}%" aria-valuenow="{{ p.progress|floatformat:'0' }}" aria-valuemin="0" aria-valuemax="100">{% if p.progress %}{{ p.progress|floatformat:'0' }}%{% endif %}</div>
+              </div>
+              </a>
+        </td>
         </tr>
       {% endfor %}
       </tbody>
