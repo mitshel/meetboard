@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 
+from meetings.models import Meeting
+
 pSplit = 1
 pItem = 0
 fabula_prefix = 'СЛУШАЛИ: '
@@ -25,6 +27,7 @@ class Protocol(models.Model):
     proto_fio = models.CharField(max_length=64, blank=True)
     proto_dol = models.CharField(max_length=128, blank=True)
     proto_off = models.IntegerField(default=0, db_index=True)
+    meeting = models.OneToOneField(Meeting, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         verbose_name = 'Протокол'
