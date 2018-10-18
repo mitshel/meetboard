@@ -14,5 +14,7 @@ urlpatterns = [
     path('protodoc/<str:proto_id>/', views.proto_doc, name='doc'),
     path('check/<str:proto_id>/', views.proto_check, name='check'),
     path('checkupd/', views.check_update, name='checkupd'),
+    path('decisions/<int:complete>/', views.dec_table, name='decisions'),
     path('decisions/', views.dec_table, name='decisions'),
+    path('storecheck/', views.store_check, name='storecheck'),
 ]

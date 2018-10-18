@@ -5,52 +5,82 @@
 {% block content %}
 
     <h5>
-       Контроль за исполнением поручений
+       Контроль за исполнением поручений ({% if complete == 0 %}невыполненные{% elif complete == 1 %}выполненные{% elif complete == 2 %}все{% elif complete == 3 %}просроченные{% else %}-{% endif %}).
     </h5>
     <br>
+
+    <!-- ------------------------------------------- -->
+    <!-- controlModal ------------------------ -->
+    <!-- ------------------------------------------- -->
+    <div class="modal control-modal" id="controlModal" tabindex="-1" role="dialog" aria-labelledby="controlModalTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="controlModalTitle">Установить отметку или комментарий по поручению <b>"<span></span>"</b> ?</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+              <form method="post" action="{% url 'protocols:storecheck' %}" id="controlForm">
+                  {% csrf_token %}
+                  <div class="form-group">
+                    <input type="range" title="0%" class="form-control-range" value="0" id="dec_progress" name="dec_progress" onchange="$('#ldec_progress').text($(this).val()+'%')">
+                    <label style="text-align:center;" id="ldec_progress" for="dec_progress">0%</label>
+                  </div>
+                  <div class="form-group">
+                      <textarea class="form-control form-control-sm" id="dec_comment" name="dec_comment" rows="2"></textarea>
+                  </div>
+                  <input type="hidden" id="dec_id" name="dec_id">
+              </form>
+
+          </div>
+          <div class="modal-footer">
+            <a type="button" class="btn btn-secondary" data-dismiss="modal" href="#">Выйти</a>
+            <a type="button" class="btn btn-primary" id="controlSave">Сохранить</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
 <!-- ------------------------------------------- -->
 <!-- decisionsTable          ------------------------ -->
 <!-- ------------------------------------------- -->
-<form action="{% url 'protocols:checkupd' %}" method="post">
 {% csrf_token %}
 <table class="table table-sm table-hover display w-100" width="100%" id="decTable">
   <thead>
     <tr>
       <th scope="col">№</th>
+      <th scope="col">Протокол</th>
       <th scope="col">Поручение</th>
       <th scope="col">Ответственный</th>
       <th scope="col">Срок</th>
       <th scope="col">Прогресс</th>
       <th scope="col" width="30%">Комментарий</th>
+      <th scope="col">Изм.</th>
     </tr>
   </thead>
   <tbody>
   {% for dec in decisions %}
     <tr>
       <td>{{ forloop.counter }}.</td>
+        <td><span data-toggle="tooltip" data-placement="top" title="{{ dec.protocol.proto_header }}">{{ dec.protocol.proto_regnum }} от {{ dec.protocol.proto_regdate | date:"d.m.Y" }}</span></td>
       <td>{{ dec.dec_text }}</td>
       <td>{{ dec.dec_performers }}</td>
       <td>{{ dec.dec_term }}</td>
       <td>
-          <div class="form-group">
-            <input type="range" title="{{ dec.dec_progress }}%" class="form-control-range" value="{{ dec.dec_progress }}" id="dec_progress_{{ dec.id }}" name="dec_progress_{{ dec.id }}" onchange="$('#ldec_progress_{{ dec.id }}').text($(this).val()+'%')">
-            <label style="text-align:center;" id="ldec_progress_{{ dec.id }}" for="dec_progress_{{ dec.id }}">{{ dec.dec_progress }}%</label>
+          <div class="progress">
+              <div id="progress_{{ dec.id }}" class="progress-bar progress-bar-striped {% if dec.dec_progress < 50 %}bg-danger{% elif dec.dec_progress < 80 %}bg-warning{% elif dec.dec_progress < 100 %}bg-info{% else %}bg-success{% endif %}" role="progressbar" style="width: {{ dec.dec_progress|floatformat:'0' }}%" aria-valuenow="{{ dec.dec_progress|floatformat:'0' }}" aria-valuemin="0" aria-valuemax="100">{% if dec.dec_progress %}{{ dec.dec_progress|floatformat:'0' }}%{% endif %}</div>
           </div>
       </td>
+      <td><span id="comment_{{ dec.id }}">{{ dec.dec_comment }}</span></td>
       <td>
-          <div class="form-group">
-              <textarea class="form-control form-control-sm" id="dec_comment_{{ dec.id }}" name="dec_comment_{{ dec.id }}" rows="2">{{ dec.dec_comment }}</textarea>
-          </div>
+         <a href="#" data-toggle="modal" data-target=".control-modal" data-placement="top" title="Изменить контроль" data-dec-id="{{ dec.id }}" data-dec-text="{{ dec.dec_text }}" data-dec-comment="{{ dec.dec_comment }}" data-dec-progress={{ dec.dec_progress }}><i class="fa fa-edit"></i></a>
       </td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
-    <input type="hidden" name="rowOrder" value="{% for dec in decisions %}{{ dec.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
-    <button type="submit" class="btn btn-primary">Сохранить</button>
-    <a role="button" class="btn btn-secondary" href="{% url 'protocols:table' %}" > Отмена </a>
-
-</form>
 {% endblock %}  {# content #}
 
 {% block js-block %}
@@ -82,6 +112,52 @@ $(document).ready( function () {
                         }
         });
 } );
+
+////////////////////////////////////////////////////////////////
+// controlModal Settings and Functions
+//
+    $('#controlModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+        var dec_id = button.data('dec-id'); // Extract info from data-* attributes
+        var dec_text = button.data('dec-text'); // Extract info from data-* attributes
+        var dec_progress = button.data('dec-progress'); // Extract info from data-* attributes
+        var dec_comment = button.data('dec-comment'); // Extract info from data-* attributes
+
+        var modal = $('#controlModal');
+        modal.find('.modal-title').html('Установить отметку или комментарий по поручению <b>'+dec_text+'</b> ?');
+        $('#dec_progress').val(dec_progress);
+        $('#ldec_progress').text(dec_progress+'%');
+        $('#dec_comment').val(dec_comment);
+        $('#dec_id').val(dec_id);
+    });
+
+    // Handle `Save` button click
+    $('#controlSave').button().click(function () {
+        var dec_progress = $('#dec_progress').val();
+        var dec_comment = $('#dec_comment').val()
+        var dec_id = $('#dec_id').val();
+
+        msg = $('#controlForm').serialize();
+        action_url = $('#controlForm').attr("action");
+
+        $.ajax({
+            type: 'POST',
+            url: action_url,
+            data: msg,
+            success: function (data) {
+            },
+            error: function (xhr, str) {
+            }
+        });
+
+        $('#progress_'+dec_id).attr('style',"width: "+dec_progress+"%")
+        $('#progress_'+dec_id).attr('aria-valuenow',dec_progress);
+        $('#progress_'+dec_id).text(dec_progress+"%");
+        $('#comment_'+dec_id).text(dec_comment);
+
+        $('#controlModal').modal('hide');
+        return true;
+    });
 
 </script>
 {% endblock %}  {# js-block #}

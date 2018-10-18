@@ -220,9 +220,9 @@ def decisions_get(request, proto_id=None):
     if request.is_ajax():
         proto_id = int(proto_id) if proto_id else 0
 
-        decisions = Decision.objects.filter(protocol_id=proto_id).order_by('order_n').values()
+        decisions = Decision.objects.filter(protocol_id=proto_id).order_by('order_n').\
+                    values('id','dec_type','dec_text','dec_term','dec_performers','dec_progress','dec_comment','order_n')
         data = json.dumps([dict(item) for item in decisions])
-        print(data)
         return HttpResponse(data,'json')
 
     return proto_table(request)
@@ -264,8 +264,41 @@ def check_update(request):
     return redirect(reverse("protocols:table"))
 
 @mb_login(url='login')
-def dec_table(request):
+def dec_table(request, complete=2):
     args={}
-    decisions = Decision.objects.filter(protocol__proto_off=0, dec_type=0).order_by('-dec_date','-dec_term')
+    decisions = Decision.objects.filter(protocol__proto_off=0, dec_type=0)
+    if (complete == 0):
+        # Невыполненные поручения
+        decisions = decisions.filter(dec_progress__lt=100)
+    elif (complete == 1):
+        # Выполненные поручения
+        decisions = decisions.filter(dec_progress=100)
+    elif (complete == 3):
+        # Просроченные поручения
+        decisions = decisions.filter(dec_progress__lt=100, dec_date__lt=timezone.now())
+
+    decisions = decisions.order_by('-dec_date', '-dec_term')
     args['decisions'] = decisions
+    args['complete'] = complete
+
     return render(request,'pt_decisions.html', args)
+
+@mb_login(url='login')
+def store_check(request):
+    res = 1
+    args={}
+    args.update(csrf(request))
+    if request.method == 'POST':
+        if request.POST:
+            res = 0
+            dec_id = int(request.POST.get('dec_id', 0))
+            dec_progress = int(request.POST.get('dec_progress', 0))
+            dec_comment = request.POST.get('dec_comment', '')
+
+            Decision.objects.filter(id=dec_id).update(dec_progress=dec_progress, dec_comment=dec_comment)
+
+    response = HttpResponse()
+    response['Content-Type'] = "text/javascript"
+    response.write(json.dumps({'user': 'admin', 'id': 1, 'result': res}))
+    return response
+
