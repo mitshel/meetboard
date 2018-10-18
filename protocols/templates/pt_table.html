@@ -5,9 +5,13 @@
 {% block content %}
     <div class="row">
     <div class="col-sm-12">
+        {% if proto_archive %}
+            <h2>Архив протоколов (снятые с контроля).</h2>
+        {% else %}
         <div class="btn-group" role="group" aria-label="meetings menu">
               <a type="button" class="btn btn-primary" href="{% url 'protocols:add' %}"><i class="fa fa-plus"></i> Создать протокол </a>
         </div>
+        {% endif %}
     </div>
     </div>
 
@@ -20,17 +24,27 @@
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="protocolDeleteModalTitle">Удаление протокола</h5>
+            <h5 class="modal-title" id="protocolDeleteModalTitle">
+                {% if proto_archive %}
+                    Удаление протокола
+                {% else %}
+                    Перемещение протокола в Архив
+                {% endif %}
+            </h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div class="modal-body">
-               Вы действительно хотите удалить протокол <b>"<span></span>"</b>?
+              {% if proto_archive %}
+                  Вы действительно хотите удалить протокол <b>"<span></span>"</b> ?
+              {% else %}
+                  Снять с контроля протокол <b>"<span></span>"</b>?
+              {% endif %}
           </div>
           <div class="modal-footer">
-            <a type="button" class="btn btn-secondary" data-dismiss="modal" href="#">Выйти без удаления</a>
-            <a type="button" class="btn btn-primary" href="#" id="protocolDeleteButton">Удалить протокол</a>
+            <a type="button" class="btn btn-secondary" data-dismiss="modal" href="#">Выйти</a>
+            <a type="button" class="btn btn-primary" href="#" id="protocolDeleteButton">{% if proto_archive %}Удалить протокол{% else %}В Архив{% endif %}</a>
           </div>
         </div>
       </div>

@@ -47,6 +47,18 @@
     </div>
 
     <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="proto_fabula">Префикс основного текста:</label>
+        <input type="text" class="form-control form-control-sm" id="proto_fabula_prefix" name="proto_fabula_prefix" value="{% if proto.proto_fabula_prefix %}{{ proto.proto_fabula_prefix }}{% else %}{{ fabula_prefix }}{% endif %}">
+      </div>
+
+      <div class="form-group col-md-6">
+        <label for="proto_fabula">Префикс списка решений:</label>
+        <input type="text" class="form-control form-control-sm" id="proto_decisions_prefix" name="proto_decisions_prefix" value="{% if proto.proto_decisions_prefix %}{{ proto.proto_decisions_prefix }}{% else %}{{ decisions_prefix }}{% endif %}">
+      </div>
+    </div>
+
+    <div class="form-row">
       <div class="form-group col-md-12">
         <label for="proto_fabula">Основной текст протокола:</label>
         <textarea rows="3" class="form-control form-control-sm" id="proto_fabula" name="proto_fabula" placeholder="Введите основной текст протокола">{{ proto.proto_fabula }}</textarea>
@@ -63,7 +75,12 @@
         <label for="proto_dol">Должность:</label>
         <input type="text" class="form-control form-control-sm" id="proto_dol" name="proto_dol" placeholder="" value="{{ proto.proto_dol }}">
       </div>
-      <div class="form-group col-md-4"></div>
+      <div class="form-group col-md-4" style="padding-top:2rem; paddibg-left:2rem;">
+          <div class="form-group form-check">
+            <input type="checkbox" class="form-check-input" id="proto_off" name="proto_off" {% if proto.proto_off %}checked{% endif %}>
+            <label class="form-check-label" for="proto_off">Снят с контроля</label>
+          </div>
+      </div>
     </div>
 
     <br>

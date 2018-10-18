@@ -3,6 +3,8 @@ from django.utils import timezone
 
 pSplit = 1
 pItem = 0
+fabula_prefix = 'СЛУШАЛИ: '
+decisions_prefix = 'РЕШИЛИ: '
 
 DECISIONS_TYPE_CHOICES = (
     (pItem, 'Пункт'),
@@ -18,8 +20,11 @@ class Protocol(models.Model):
     proto_date = models.CharField(max_length=32, null=True)
     proto_preambula = models.TextField(blank=True)
     proto_fabula = models.TextField(blank=True)
+    proto_fabula_prefix = models.CharField(max_length=32,default=fabula_prefix)
+    proto_decisions_prefix = models.CharField(max_length=32,default=decisions_prefix)
     proto_fio = models.CharField(max_length=64, blank=True)
     proto_dol = models.CharField(max_length=128, blank=True)
+    proto_off = models.IntegerField(default=0, db_index=True)
 
     class Meta:
         verbose_name = 'Протокол'

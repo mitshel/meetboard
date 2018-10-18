@@ -4,6 +4,7 @@ from protocols import views
 
 urlpatterns = [
     path('table/', views.proto_table, name='table'),
+    path('table/<str:archive>/', views.proto_table, name='table'),
     path('add/', views.proto_update, name='add'),
     path('delete/<str:proto_id>/', views.proto_delete, name='delete'),
     path('update/<str:proto_id>/', views.proto_update, name='update'),
@@ -13,4 +14,5 @@ urlpatterns = [
     path('protodoc/<str:proto_id>/', views.proto_doc, name='doc'),
     path('check/<str:proto_id>/', views.proto_check, name='check'),
     path('checkupd/', views.check_update, name='checkupd'),
+    path('decisions/', views.dec_table, name='decisions'),
 ]

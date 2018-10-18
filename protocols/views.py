@@ -11,25 +11,48 @@ from django.http import HttpResponse
 from django.utils import timezone
 
 from mb_auth.views import mb_login
-from protocols.models import DECISIONS_TYPE_CHOICES, pItem, pSplit, Protocol, Decision
+from protocols.models import DECISIONS_TYPE_CHOICES, pItem, pSplit, fabula_prefix, decisions_prefix, Protocol, Decision
 from meetings.models import Employee
-from docxtpl import DocxTemplate
+from docxtpl import DocxTemplate, RichText
 
 # Create your views here.
 @mb_login(url='login')
-def proto_table(request):
+def proto_table(request, archive=None):
+    if archive==None:
+        archive = request.session['proto_archive']
+
+    try:
+        archive = int(archive)
+    except:
+        archive = 0
+
+    request.session['proto_archive'] = archive
+
     args={}
     args['employees'] = Employee.objects.all().order_by('f','i','o','dol')
-    args['protocols'] = Protocol.objects.all().\
+    args['protocols'] = Protocol.objects.filter(proto_off=archive).\
         annotate(decisions_cnt=Count('decision')). \
         annotate(progress=Avg('decision__dec_progress',filter=Q(decision__dec_type=0))).\
         order_by('-proto_regdate','-proto_regnum')
     args['dec_type_choices'] = DECISIONS_TYPE_CHOICES
+
+    args['proto_archive'] = archive
+
     return render(request,'pt_table.html', args)
 
 @mb_login(url='login')
 def proto_delete(request, proto_id=None):
-    Protocol.objects.filter(id=proto_id).delete()
+    try:
+        proto = Protocol.objects.get(id=proto_id)
+    except:
+        proto = None
+    if proto:
+        if proto.proto_off:
+            proto.delete()
+        else:
+            proto.proto_off = 1
+            proto.save()
+
     return redirect(reverse("protocols:table"))
 
 @mb_login(url='login')
@@ -45,16 +68,19 @@ def proto_update(request, proto_id=None):
     # if this is a POST request we need to process the form data
     if request.method == 'POST':
         if request.POST:
-            proto_header = request.POST.get('proto_header')
+            proto_header = request.POST.get('proto_header','')
             proto_regdate = request.POST.get('proto_regdate')
             proto_regdate = datetime.datetime.strptime(proto_regdate, '%d.%m.%Y').date()
-            proto_regnum = request.POST.get('proto_regnum')
-            proto_place = request.POST.get('proto_place')
-            proto_date = request.POST.get('proto_date')
-            proto_preambula = request.POST.get('proto_preambula')
-            proto_fabula = request.POST.get('proto_fabula')
-            proto_fio = request.POST.get('proto_fio')
-            proto_dol = request.POST.get('proto_dol')
+            proto_regnum = request.POST.get('proto_regnum','')
+            proto_place = request.POST.get('proto_place','')
+            proto_date = request.POST.get('proto_date','')
+            proto_preambula = request.POST.get('proto_preambula','')
+            proto_fabula = request.POST.get('proto_fabula','')
+            proto_fio = request.POST.get('proto_fio','')
+            proto_dol = request.POST.get('proto_dol','')
+            proto_fabula_prefix = request.POST.get('proto_fabula_prefix','')
+            proto_decisions_prefix = request.POST.get('proto_decisions_prefix', '')
+            proto_off = 1 if (request.POST.get('proto_off')) else 0
 
             # Если произошло копирование протокола, то opt_id содержит ID старого совещания
             try:
@@ -66,12 +92,16 @@ def proto_update(request, proto_id=None):
                 Protocol.objects.filter(id=proto_id).update(proto_header=proto_header,proto_regdate=proto_regdate,
                                                             proto_regnum=proto_regnum, proto_place=proto_place, proto_date=proto_date,
                                                             proto_preambula=proto_preambula, proto_fabula=proto_fabula,
-                                                            proto_fio=proto_fio, proto_dol=proto_dol)
+                                                            proto_fio=proto_fio, proto_dol=proto_dol,
+                                                            proto_fabula_prefix=proto_fabula_prefix, proto_decisions_prefix=proto_decisions_prefix,
+                                                            proto_off=proto_off)
             else:
                 proto_id=Protocol.objects.create(proto_header=proto_header,proto_regdate=proto_regdate,
                                                         proto_regnum=proto_regnum, proto_place=proto_place, proto_date=proto_date,
                                                         proto_preambula=proto_preambula, proto_fabula=proto_fabula,
-                                                        proto_fio=proto_fio, proto_dol=proto_dol).id
+                                                        proto_fio=proto_fio, proto_dol=proto_dol,
+                                                        proto_fabula_prefix=proto_fabula_prefix, proto_decisions_prefix=proto_decisions_prefix,
+                                                        proto_off=proto_off).id
 
             return redirect(reverse("protocols:table"))
 
@@ -83,6 +113,8 @@ def proto_update(request, proto_id=None):
 
     args['employees'] = Employee.objects.all().order_by('f', 'i', 'o').values('f', 'i', 'o','dol')
     args['proto']=proto
+    args['fabula_prefix']=fabula_prefix
+    args['decisions_prefix']=decisions_prefix
     args['proto_id'] = proto_id
 
     return render(request,'pt_protoform.html', args)
@@ -163,7 +195,11 @@ def proto_doc(request, proto_id=None):
         fullname="media/{}".format(filename)
         doc = DocxTemplate("media/protocol_tpl.docx")
         context = {'protocol': protocol,
-                   'decisions': decisions}
+                   'decisions': decisions,
+                   'proto_header': RichText(protocol.proto_header,size=28,font='Times New Roman'),
+                   'proto_preambula': RichText(protocol.proto_preambula,size=28,font='Times New Roman'),
+                   'proto_fabula': RichText(protocol.proto_fabula,size=28,font='Times New Roman')
+                   }
         doc.render(context)
         doc.save(fullname)
 
@@ -226,3 +262,10 @@ def check_update(request):
                     Decision.objects.filter(id=id).update(dec_progress=dec_progress, dec_comment=dec_comment)
 
     return redirect(reverse("protocols:table"))
+
+@mb_login(url='login')
+def dec_table(request):
+    args={}
+    decisions = Decision.objects.filter(protocol__proto_off=0, dec_type=0).order_by('-dec_date','-dec_term')
+    args['decisions'] = decisions
+    return render(request,'pt_decisions.html', args)

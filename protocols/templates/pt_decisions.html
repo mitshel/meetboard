@@ -1,0 +1,87 @@
+{% extends "mb_main.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block content %}
+
+    <h5>
+       Контроль за исполнением поручений
+    </h5>
+    <br>
+<!-- ------------------------------------------- -->
+<!-- decisionsTable          ------------------------ -->
+<!-- ------------------------------------------- -->
+<form action="{% url 'protocols:checkupd' %}" method="post">
+{% csrf_token %}
+<table class="table table-sm table-hover display w-100" width="100%" id="decTable">
+  <thead>
+    <tr>
+      <th scope="col">№</th>
+      <th scope="col">Поручение</th>
+      <th scope="col">Ответственный</th>
+      <th scope="col">Срок</th>
+      <th scope="col">Прогресс</th>
+      <th scope="col" width="30%">Комментарий</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for dec in decisions %}
+    <tr>
+      <td>{{ forloop.counter }}.</td>
+      <td>{{ dec.dec_text }}</td>
+      <td>{{ dec.dec_performers }}</td>
+      <td>{{ dec.dec_term }}</td>
+      <td>
+          <div class="form-group">
+            <input type="range" title="{{ dec.dec_progress }}%" class="form-control-range" value="{{ dec.dec_progress }}" id="dec_progress_{{ dec.id }}" name="dec_progress_{{ dec.id }}" onchange="$('#ldec_progress_{{ dec.id }}').text($(this).val()+'%')">
+            <label style="text-align:center;" id="ldec_progress_{{ dec.id }}" for="dec_progress_{{ dec.id }}">{{ dec.dec_progress }}%</label>
+          </div>
+      </td>
+      <td>
+          <div class="form-group">
+              <textarea class="form-control form-control-sm" id="dec_comment_{{ dec.id }}" name="dec_comment_{{ dec.id }}" rows="2">{{ dec.dec_comment }}</textarea>
+          </div>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+    <input type="hidden" name="rowOrder" value="{% for dec in decisions %}{{ dec.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <a role="button" class="btn btn-secondary" href="{% url 'protocols:table' %}" > Отмена </a>
+
+</form>
+{% endblock %}  {# content #}
+
+{% block js-block %}
+<script type="text/javascript">
+$(document).ready( function () {
+    $('#decTable').DataTable({
+            ordering:  true,
+            "language": {
+                          "processing": "Подождите...",
+                          "search": "Поиск:",
+                          "lengthMenu": "Показать _MENU_ записей",
+                          "info": "Записи с _START_ до _END_ из _TOTAL_ записей",
+                          "infoEmpty": "Записи с 0 до 0 из 0 записей",
+                          "infoFiltered": "(отфильтровано из _MAX_ записей)",
+                          "infoPostFix": "",
+                          "loadingRecords": "Загрузка записей...",
+                          "zeroRecords": "Записи отсутствуют.",
+                          "emptyTable": "В таблице отсутствуют данные",
+                          "paginate": {
+                            "first": "Первая",
+                            "previous": "Предыдущая",
+                            "next": "Следующая",
+                            "last": "Последняя"
+                          },
+                          "aria": {
+                            "sortAscending": ": активировать для сортировки столбца по возрастанию",
+                            "sortDescending": ": активировать для сортировки столбца по убыванию"
+                          }
+                        }
+        });
+} );
+
+</script>
+{% endblock %}  {# js-block #}
