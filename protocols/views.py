@@ -303,8 +303,11 @@ def dec_table(request, complete=2):
     elif (complete == 3):
         # Просроченные поручения
         decisions = decisions.filter(dec_progress__lt=100, dec_date__lt=timezone.now())
+    elif (complete == 4):
+        # Кроме бессрочных
+        decisions = decisions.exclude(dec_date__isnull=True)
 
-    decisions = decisions.order_by('-dec_date', '-dec_term')
+    decisions = decisions.order_by('dec_date', '-dec_term')
     args['decisions'] = decisions
     args['complete'] = complete
 
