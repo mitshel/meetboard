@@ -91,6 +91,9 @@ def proto_update(request, proto_id=None, meet_id=None):
             except:
                 meet_id = None
 
+            if meet_id == 0:
+                meet_id = None
+
             # Если произошло копирование протокола, то opt_id содержит ID старого совещания
             try:
                 opt_id = request.POST.get('opt_id',0)
@@ -152,6 +155,11 @@ def proto_copy(request, proto_id=None):
     args['employees'] = Employee.objects.all().order_by('f', 'i', 'o').values('f', 'i', 'o', 'dol')
     args['proto']=opt
     args['proto_id'] = None
+
+    args['fabula_prefix'] = fabula_prefix
+    args['decisions_prefix'] = decisions_prefix
+    args['meet_id'] = 0
+    args['meet'] = Meeting.objects.filter(Q(protocol__meeting_id__isnull=True)).order_by('-meet_date')
 
     return render(request,'pt_protoform.html', args)
 
