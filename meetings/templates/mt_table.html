@@ -193,6 +193,7 @@
           <th scope="col">Участники</th>
           <th scope="col">Повестка</th>
           <th scope="col">Студии</th>
+          <th scope="col">Прот.</th>
         </tr>
       </thead>
       <tbody>
@@ -224,6 +225,13 @@
           <td {% if m.studios_cnt == 0 %}class="table-warning"{% endif %}>
               <a href="#" data-toggle="modal" data-target=".studios-modal-lg" data-meet="{{ m.id }}" data-subj="{{ m.meet_subj }}" data-dt="{{ m.meet_date }}">Студии</a>
               <a href="{% url 'meetings:studiosdoc' m.id %}" target='_blank' data-toggle="tooltip" data-placement="top" title="Формировать заявку" onClick=""><i class="fa fa-file"></i></a>
+          </td>
+          <td>
+              {% if m.proto_id %}
+                 <a href="{% url 'protocols:check' m.proto_id %}">{{ m.proto_n }} от {{ m.proto_d|date:"d.m.Y" }}</a>
+              {% else %}
+                 <a href="{% url 'protocols:update' proto_id=0 meet_id=m.id %}">Создать</a>
+              {% endif %}
           </td>
         </tr>
       {% endfor %}

@@ -31,10 +31,12 @@ def meet_table(request):
     args['employees'] = Employee.objects.all().order_by('f','i','o','dol')
     args['meetings'] = Meeting.objects.all().\
         annotate(members_cnt=Count('member'),items_cnt=Count('item'),studios_cnt=Count('studiolist')). \
-        annotate(complete=F('check__complete'),
+        annotate(proto_id=F('protocol__id'), proto_n=F('protocol__proto_regnum'), proto_d=F('protocol__proto_regdate'),
+                 complete=F('check__complete'),
                  total=F('check__total'),
                  progress=(F('check__complete') * 100 / F('check__total') )). \
         order_by('-meet_date','-meet_start')
+
     args['deps'] = Dep.objects.all().annotate(studios_cnt=Count('studio')).order_by('name')
     return render(request,'mt_table.html', args)
 

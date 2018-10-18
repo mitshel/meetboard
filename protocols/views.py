@@ -10,6 +10,8 @@ from django.template.context_processors import csrf
 from django.http import HttpResponse
 from django.utils import timezone
 
+from meetings.models import Meeting
+
 from mb_auth.views import mb_login
 from meetings.models import Employee
 from protocols.models import DECISIONS_TYPE_CHOICES, pItem, fabula_prefix, decisions_prefix, Protocol, Decision
@@ -84,6 +86,10 @@ def proto_update(request, proto_id=None, meet_id=None):
             proto_fabula_prefix = request.POST.get('proto_fabula_prefix','')
             proto_decisions_prefix = request.POST.get('proto_decisions_prefix', '')
             proto_off = 1 if (request.POST.get('proto_off')) else 0
+            try:
+                meet_id = int(request.POST.get('proto_meet',None))
+            except:
+                meet_id = None
 
             # Если произошло копирование протокола, то opt_id содержит ID старого совещания
             try:
@@ -92,19 +98,20 @@ def proto_update(request, proto_id=None, meet_id=None):
                 opt_id=0
 
             if proto_id:
+                print(meet_id)
                 Protocol.objects.filter(id=proto_id).update(proto_header=proto_header,proto_regdate=proto_regdate,
                                                             proto_regnum=proto_regnum, proto_place=proto_place, proto_date=proto_date,
                                                             proto_preambula=proto_preambula, proto_fabula=proto_fabula,
                                                             proto_fio=proto_fio, proto_dol=proto_dol,
                                                             proto_fabula_prefix=proto_fabula_prefix, proto_decisions_prefix=proto_decisions_prefix,
-                                                            proto_off=proto_off)
+                                                            proto_off=proto_off, meeting_id=meet_id)
             else:
                 proto_id=Protocol.objects.create(proto_header=proto_header,proto_regdate=proto_regdate,
                                                         proto_regnum=proto_regnum, proto_place=proto_place, proto_date=proto_date,
                                                         proto_preambula=proto_preambula, proto_fabula=proto_fabula,
                                                         proto_fio=proto_fio, proto_dol=proto_dol,
                                                         proto_fabula_prefix=proto_fabula_prefix, proto_decisions_prefix=proto_decisions_prefix,
-                                                        proto_off=proto_off).id
+                                                        proto_off=proto_off, meeting_id=meet_id).id
 
             return redirect(reverse("protocols:table"))
 
@@ -119,6 +126,15 @@ def proto_update(request, proto_id=None, meet_id=None):
     args['fabula_prefix']=fabula_prefix
     args['decisions_prefix']=decisions_prefix
     args['proto_id'] = proto_id
+
+    if meet_id:
+        args['meet_id'] = meet_id
+    elif proto:
+        args['meet_id'] = proto.meeting.id if proto.meeting else 0
+    else:
+        args['meet_id'] = 0
+
+    args['meet'] = Meeting.objects.filter(Q(protocol__meeting_id__isnull=True) | Q(id=args['meet_id'])).order_by('-meet_date')
 
     return render(request,'pt_protoform.html', args)
 

@@ -83,6 +83,18 @@
       </div>
     </div>
 
+    <div class="form-row">
+      <div class="form-group col-md-12">
+        <label for="proto_meet">Совещание:</label>
+            <select id="proto_meet" name="proto_meet" class="form-control form-control-sm">
+                     <option value="0">{ При необходимости выберете совещание }</option>
+                {% for m in meet %}
+                     <option value="{{ m.id }}" {% if m.id == meet_id %}selected{% endif %}>{% if m.id == meet_id %}*** {% endif %}{{ m.meet_date|date:"d.m.Y" }} - {{ m.meet_subj }}</option>
+                {% endfor %}
+            </select>
+      </div>
+    </div>
+
     <br>
     <input type="hidden" id="opt_id" name="opt_id" value="{{ proto.id }}">
     <button type="submit" class="btn btn-primary"> {% if proto %}Сохранить{% else %}Создать{% endif %} протокол </button>
