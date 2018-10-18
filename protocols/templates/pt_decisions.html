@@ -64,7 +64,11 @@
   {% for dec in decisions %}
     <tr>
       <td>{{ forloop.counter }}.</td>
-        <td><span data-toggle="tooltip" data-placement="top" title="{{ dec.protocol.proto_header }}">{{ dec.protocol.proto_regnum }} от {{ dec.protocol.proto_regdate | date:"d.m.Y" }}</span></td>
+        <td>
+            <a href="{% url 'protocols:check' dec.protocol.id %}">
+            <span data-toggle="tooltip" data-placement="top" title="{{ dec.protocol.proto_header }}">{{ dec.protocol.proto_regnum }} от {{ dec.protocol.proto_regdate | date:"d.m.Y" }}</span>
+            </a>
+        </td>
       <td>{{ dec.dec_text }}</td>
       <td>{{ dec.dec_performers }}</td>
       <td>{{ dec.dec_term }}</td>
@@ -75,7 +79,7 @@
       </td>
       <td><span id="comment_{{ dec.id }}">{{ dec.dec_comment }}</span></td>
       <td>
-         <a href="#" data-toggle="modal" data-target=".control-modal" data-placement="top" title="Изменить контроль" data-dec-id="{{ dec.id }}" data-dec-text="{{ dec.dec_text }}" data-dec-comment="{{ dec.dec_comment }}" data-dec-progress={{ dec.dec_progress }}><i class="fa fa-edit"></i></a>
+         <a href="#" id="button_{{ dec.id }}" data-toggle="modal" data-target=".control-modal" data-placement="top" title="Изменить контроль" data-dec-id="{{ dec.id }}" data-dec-text="{{ dec.dec_text }}" data-dec-comment="{{ dec.dec_comment }}" data-dec-progress={{ dec.dec_progress }}><i class="fa fa-edit"></i></a>
       </td>
     </tr>
   {% endfor %}
@@ -120,8 +124,8 @@ $(document).ready( function () {
         var button = $(event.relatedTarget); // Button that triggered the modal
         var dec_id = button.data('dec-id'); // Extract info from data-* attributes
         var dec_text = button.data('dec-text'); // Extract info from data-* attributes
-        var dec_progress = button.data('dec-progress'); // Extract info from data-* attributes
-        var dec_comment = button.data('dec-comment'); // Extract info from data-* attributes
+        var dec_progress = $('#progress_'+dec_id).attr('aria-valuenow');
+        var dec_comment = $('#comment_'+dec_id).text();
 
         var modal = $('#controlModal');
         modal.find('.modal-title').html('Установить отметку или комментарий по поручению <b>'+dec_text+'</b> ?');
@@ -154,6 +158,11 @@ $(document).ready( function () {
         $('#progress_'+dec_id).attr('aria-valuenow',dec_progress);
         $('#progress_'+dec_id).text(dec_progress+"%");
         $('#comment_'+dec_id).text(dec_comment);
+
+        if (dec_progress < 50) { $('#progress_'+dec_id).removeClass("bg-warning bg-info bg-success").addClass("bg-danger"); }
+        else if (dec_progress < 80) { $('#progress_'+dec_id).removeClass("bg-danger bg-info bg-success").addClass("bg-warning"); }
+        else if (dec_progress < 100) { $('#progress_'+dec_id).removeClass("bg-danger bg-warning bg-success").addClass("bg-info"); }
+        else { $('#progress_'+dec_id).removeClass("bg-danger bg-warning bg-info").addClass("bg-success"); };
 
         $('#controlModal').modal('hide');
         return true;

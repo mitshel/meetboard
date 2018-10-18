@@ -11,15 +11,18 @@ from django.http import HttpResponse
 from django.utils import timezone
 
 from mb_auth.views import mb_login
-from protocols.models import DECISIONS_TYPE_CHOICES, pItem, pSplit, fabula_prefix, decisions_prefix, Protocol, Decision
 from meetings.models import Employee
+from protocols.models import DECISIONS_TYPE_CHOICES, pItem, fabula_prefix, decisions_prefix, Protocol, Decision
 from docxtpl import DocxTemplate, RichText
 
 # Create your views here.
 @mb_login(url='login')
 def proto_table(request, archive=None):
     if archive==None:
-        archive = request.session['proto_archive']
+        try:
+            archive = request.session['proto_archive']
+        except:
+            archive = 0
 
     try:
         archive = int(archive)
@@ -56,7 +59,7 @@ def proto_delete(request, proto_id=None):
     return redirect(reverse("protocols:table"))
 
 @mb_login(url='login')
-def proto_update(request, proto_id=None):
+def proto_update(request, proto_id=None, meet_id=None):
     args={}
     args.update(csrf(request))
     proto =  None
